@@ -16,12 +16,32 @@ class Board:
     move has been made there or a piece otherwise.
     """
 
-    grid: BoardGridType
+    _grid: BoardGridType
     pieces: List["Piece"]
 
     def __init__(self, side: int):
-        self.grid = [[None]*side for _ in range(side)]
-        self.pieces = []
+        self._grid = [[None]*side for _ in range(side)]
+        self._pieces = []
+
+    @property
+    def grid(self) -> BoardGridType:
+        """
+        Returns a copy of the board's grid
+        
+        Parameters: none beyond self
+        Returns[BoardGridType]: a grid
+        """
+        return self._grid
+    
+    @property
+    def pieces(self) -> List["Piece"]:
+        """
+        Returns a copy of the board's piece list
+        
+        Parameters: none beyond self
+        Returns[List[Piece]]: a list of the pieces in the board
+        """
+        return self._pieces
     
     def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
         """
@@ -33,8 +53,8 @@ class Board:
         """
         r, c = pos
         new_piece = Piece(player, pos)
-        self.grid[r][c] = player
-        self.pieces.append(new_piece)
+        self._grid[r][c] = player
+        self._pieces.append(new_piece)
 
     def get_piece(self, pos: Tuple[int, int]) -> Optional[int]:
         """
@@ -44,7 +64,25 @@ class Board:
         Returns: a piece if there is one at the coordinates, None if not
         """
         r, c = pos
-        return self.grid[r][c]
+        return self._grid[r][c]
+    
+    def update_grid(self, grid: BoardGridType) -> None:
+        """
+        Gets rid of the old version of the grid and loads a new one
+        Parameters:
+            grid[BoardGridType]: a valid grid with the same side length as the board
+        Returns: nothing
+        """
+        if len(grid) != len(self._grid):
+            raise ValueError("Cannot change board size")
+        
+        self._pieces = []
+        for r, _ in enumerate(grid):
+            for c, square in enumerate(grid):
+                if square:
+                    self._pieces.append(Piece(square, (r, c)))
+        self._grid = grid
+        
     
 
 class Piece:
@@ -408,13 +446,12 @@ class ReversiMock(ReversiBase):
         if new_side != self.size:
             raise ValueError("Input is not the same size as the current board")
         new_board = Board(new_side)
-        new_board.grid = grid
-        for r, row in enumerate(grid):
-            for c, square in enumerate(row):
-                if square:
-                    if square < 1 or square > self.num_players:
-                        raise ValueError("Grid contains invalid player")
-                    new_board.pieces.append(Piece(square, (r, c)))
+        new_board.update_grid(grid)
+        for row in enumerate(grid):
+            for square in enumerate(row):
+                if square is not None and (square < 1 or 
+                                           square > self.num_players):
+                    raise ValueError("Grid contains invalid player")
         self._board = new_board
         self._done = False
         self._outcome = []
