@@ -9,6 +9,74 @@ from copy import deepcopy
 
 from reversi import ReversiBase, BoardGridType, ListMovesType
 
+class Board:
+    """
+    Class to contain a board.
+    The board is a grid where each square in the grid is mapped to "None" if no
+    move has been made there or a piece otherwise.
+    """
+
+    _grid: BoardGridType
+
+    def __init__(self, side: int):
+        self._grid = [[None]*side for _ in range(side)]
+
+    @property
+    def grid(self) -> BoardGridType:
+        """
+        Returns the current state of the grid.
+        Parameters:
+            none beyond self
+        Returns: the grid
+        """
+        return self._grid
+    
+    def add_piece(self, player: int, pos: Tuple[int]) -> None:
+        """
+        Adds a piece to a specified position on the board
+        Parameters:
+            player [int]: the integer associated with the player adding the piece
+            pos [Tuple[int]]: coordinates within the grid
+        Returns: nothing
+        """
+        r, c = pos
+        self._grid[r][c] = Piece(player, pos)
+
+    def get_piece(self, pos: Tuple[int]) -> Optional["Piece"]:
+        """
+        Finds the piece at a specified point in the board
+        Parameters:
+            pos[Tuple[int]]: coordinates within the grid
+        Returns: a piece if there is one at the coordinates, None if not
+        """
+        r, c = pos
+        return self._grid[r][c]
+    
+
+class Piece:
+    """
+    Class to contain a piece
+    """
+    def __init__(self, player: int, pos: Tuple[int]):
+        self._player = player
+        self._pos = pos
+
+    @property
+    def player(self):
+        """
+        Which player played this piece
+        Paramters: None beyond self
+        Returns [int]: player name
+        """
+        return self._player
+    
+    @property
+    def pos(self):
+        """
+        Where on its board the piece is located
+        """
+        return self._pos
+
 
 class ReversiStub(ReversiBase):
     """
