@@ -4,7 +4,7 @@ Mock implementations of ReversiBase.
 We provide a ReversiStub implementation, and you must
 implement a ReversiMock implementation.
 """
-from typing import List, Tuple, Optional, Set
+from typing import List, Tuple, Optional
 from copy import deepcopy
 
 from reversi import ReversiBase, BoardGridType, ListMovesType
