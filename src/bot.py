@@ -50,7 +50,3 @@ while games_played < NUM_GAMES:
 for key, value in results.items():
     percentage = value / NUM_GAMES * 100
     print(f"{key}: {percentage}%")
-
-
-
-

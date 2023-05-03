@@ -17,7 +17,7 @@ class Board:
     """
 
     _grid: BoardGridType
-    pieces: List["Piece"]
+    _pieces: List["Piece"]
 
     def __init__(self, side: int):
         self._grid = [[None]*side for _ in range(side)]
@@ -83,13 +83,16 @@ class Board:
                     self._pieces.append(Piece(square, (r, c)))
         self._grid = grid
         
-    
 
 class Piece:
     """
     Class to contain a piece
     """
-    def __init__(self, player: int, pos: Tuple[int]):
+
+    _player: int
+    _pos: Tuple[int, int]
+
+    def __init__(self, player: int, pos: Tuple[int, int]):
         self._player = player
         self._pos = pos
 
@@ -398,7 +401,7 @@ class ReversiMock(ReversiBase):
             self.end_game([self.turn])
         if pos == (self.size - 1, self.size - 1):
             self.end_game([i for i in range(1, self.num_players + 1)])
-        if self.turn < self.num_players:
+        if self._turn < self.num_players:
             self._turn += 1
         else:
             self._turn = 1
