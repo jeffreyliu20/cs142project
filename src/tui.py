@@ -39,9 +39,14 @@ stub = ReversiStub(board_size, num_players, othello)
 if 6 <= board_size <= 20:
     
     grid_size = 2 * board_size + 1
-    board = [[" "] * grid_size] * grid_size
+    
+    board = []
 
-    print(board)
+    for i in range(grid_size):
+        board_row = []
+        for j in range(grid_size):
+            board_row.append("")
+        board.append(board_row)
 
     for r in range(grid_size):
         for c in range(grid_size):
@@ -63,20 +68,19 @@ if 6 <= board_size <= 20:
             elif c == len(board) - 1:
                 grid_dir[1] = False
 
-            board[r][c] = CLOCK_CHARS[tuple(grid_dir)]
+            tup = (grid_dir[0], grid_dir[1], grid_dir[2], grid_dir[3])
+            board[r][c] = CLOCK_CHARS[tup]
 
     while not stub.done:
 
-        for x, row2 in enumerate(stub.grid):
-            for y, cell in enumerate(row2):
+        for x, row in enumerate(stub.grid):
+            for y, cell in enumerate(row):
                 if stub.grid[x][y] is not None:
                     board[2 * x + 1][2 * y + 1] = f"{cell}"
 
-        lst = []
-
         board_row = []
-        for row3 in board:
-            board_row.append("".join(row3))
+        for row2 in board:
+            board_row.append("".join(row2))
 
         board_str = "\n".join(board_row)
 
