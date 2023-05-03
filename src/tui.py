@@ -1,7 +1,7 @@
 
 import sys
 from typing import List, Optional, Tuple, Set, Callable
-from mocks import ReversiStub
+from mocks import ReversiStub, ReversiMock
 from reversi import BoardGridType
 
 board_size: int = int(sys.argv[1])
@@ -34,10 +34,10 @@ CLOCK_CHARS = {
     (True, True, True, True): WALL_CHARS["HV_WALL"]
 }
 
-stub = ReversiStub(board_size, num_players, othello)
+game = ReversiStub(board_size, num_players, othello)
 
 if 6 <= board_size <= 20:
-    
+
     grid_size = 2 * board_size + 1
     
     board = []
@@ -71,11 +71,20 @@ if 6 <= board_size <= 20:
             tup = (grid_dir[0], grid_dir[1], grid_dir[2], grid_dir[3])
             board[r][c] = CLOCK_CHARS[tup]
 
-    while not stub.done:
+    while not game.done:
 
-        for x, row in enumerate(stub.grid):
+        # move_r = int(input("Input row of move: "))
+        # move_c = int(input("Input column of move: "))
+
+        # if not game.legal_move((move_r, move_c)):
+        #     print("Not a legal move, please try again")
+        #     continue
+
+        # game.apply_move((move_r, move_c))
+
+        for x, row in enumerate(game.grid):
             for y, cell in enumerate(row):
-                if stub.grid[x][y] is not None:
+                if game.grid[x][y] is not None:
                     board[2 * x + 1][2 * y + 1] = f"{cell}"
 
         board_row = []
@@ -83,9 +92,11 @@ if 6 <= board_size <= 20:
             board_row.append("".join(row2))
 
         board_str = "\n".join(board_row)
-
         print(board_str)
 
         break
+
+    print("Game Over, Good Job")
+
 else:
     print("Invalid board size, please try again")
