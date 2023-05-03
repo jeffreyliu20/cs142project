@@ -77,8 +77,8 @@ class Board:
             raise ValueError("Cannot change board size")
         
         self._pieces = []
-        for r, _ in enumerate(grid):
-            for c, square in enumerate(grid):
+        for r, row in enumerate(grid):
+            for c, square in enumerate(row):
                 if square:
                     self._pieces.append(Piece(square, (r, c)))
         self._grid = grid
@@ -450,8 +450,8 @@ class ReversiMock(ReversiBase):
             raise ValueError("Input is not the same size as the current board")
         new_board = Board(new_side)
         new_board.update_grid(grid)
-        for row in enumerate(grid):
-            for square in enumerate(row):
+        for row in grid:
+            for square in row:
                 if square is not None and (square < 1 or 
                                            square > self.num_players):
                     raise ValueError("Grid contains invalid player")

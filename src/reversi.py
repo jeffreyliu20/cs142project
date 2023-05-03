@@ -284,7 +284,7 @@ class Reversi(ReversiBase):
         Raises:
             ValueError: If the parity of side and players is incorrect
         """
-        super.__init(side, players, othello)
+        super().__init__(side, players, othello)
 
     @property
     @abstractmethod
