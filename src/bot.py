@@ -6,7 +6,7 @@ Currently only functional for the ReversiStub class.
 import sys
 from reversi import ReversiBase
 from mocks import ReversiStub
-from typing import Union, Tuple
+from typing import Tuple
 import random
 
 def choose_random_move(revers: ReversiBase) -> Tuple[int, int]:
@@ -39,6 +39,8 @@ def play_game() -> str:
     winning_player = str(game.outcome[0])
     return f"Player {winning_player} wins"
 
+if len(sys.argv) != 2:
+    raise ValueError("bot.py only accepts one input (number of games)")
 NUM_GAMES = int(sys.argv[1])
 games_played = 0
 results = {"Player 1 wins": 0, "Player 2 wins": 0, "Tie": 0}
@@ -50,7 +52,4 @@ while games_played < NUM_GAMES:
 for key, value in results.items():
     percentage = value / NUM_GAMES * 100
     print(f"{key}: {percentage}%")
-
-
-
 
