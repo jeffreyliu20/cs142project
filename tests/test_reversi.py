@@ -290,8 +290,38 @@ def test_winner_1():
     """
 
     reversi = Reversi(side=4, players=2, othello=True)
+    reversi.apply_move((3, 1))
+    reversi.apply_move((3, 0))
+    reversi.apply_move((2, 0))
+    reversi.apply_move((1, 0))
     reversi.apply_move((0, 0))
+    reversi.apply_move((0, 2))
+    reversi.apply_move((0, 3))
+    reversi.apply_move((3, 3))
+    reversi.apply_move((0, 1))
+    reversi.apply_move((3, 2))
+    reversi.apply_move((1, 3))
+    reversi.apply_move((2, 3))
+
+    assert reversi.piece_at(0,0) == 1
+    assert reversi.piece_at(0,1) == 1
+    assert reversi.piece_at(0,2) == 1
+    assert reversi.piece_at(0,3) == 1
+    assert reversi.piece_at(1,2) == 1
+    assert reversi.piece_at(1,3) == 1
+    assert reversi.piece_at(2,3) == 1
+
+    assert reversi.piece_at(1,0) == 2
+    assert reversi.piece_at(1,2) == 2
+    assert reversi.piece_at(2,0) == 2
+    assert reversi.piece_at(2,0) == 2
+    assert reversi.piece_at(2,1) == 2
+    assert reversi.piece_at(2,2) == 2
+    assert reversi.piece_at(3,0) == 2
+    assert reversi.piece_at(3,1) == 2
+    assert reversi.piece_at(3,2) == 2
+    assert reversi.piece_at(3,3) == 2
 
     assert reversi.done
-    assert reversi.outcome == [1]
+    assert reversi.outcome == [2]
 
