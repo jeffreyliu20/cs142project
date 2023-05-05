@@ -9,6 +9,9 @@ from copy import deepcopy
 
 from reversi import ReversiBase, BoardGridType, ListMovesType
 
+DIRECTION_LIST = ((1, 1), (0, 1), (1, 0), (-1, -1), (0, -1), (-1, 0), (1, -1),
+                  (-1, 1))
+
 class Board:
     """
     Class to contain a board.
@@ -18,10 +21,13 @@ class Board:
 
     _grid: BoardGridType
     _pieces: List["Piece"]
+    _edgepieces: List["Piece"]
 
     def __init__(self, side: int):
         self._grid = [[None]*side for _ in range(side)]
         self._pieces = []
+        self._edgepieces = []
+
 
     @property
     def grid(self) -> BoardGridType:
@@ -43,6 +49,32 @@ class Board:
         """
         return self._pieces
     
+    @property
+    def edge_pieces(self) -> List["Piece":]
+        """
+        Returns a list of the pieces on a board that are not completely
+        surrounded by other pieces
+        
+        Parameters: none beyond self
+        Returns[List[Piece]]: a list of pieces on the edge of the board
+        """
+        self.update_edge_pieces()
+        return self._edgepieces
+    
+
+    def update_edge_pieces(self) -> None:
+        """
+        Removes pieces that are not on the edge from the list of edge pieces
+        
+        Parameters: none beyond self
+        Returns: None
+        """
+        final_list = self._edgepieces
+        for piece in self._edgepieces:
+            if len(piece.adjacent) == 8:
+                final_list.remove(piece)
+        self._edgepieces = final_list
+    
     def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
         """
         Adds a piece to a specified position on the board
@@ -53,8 +85,15 @@ class Board:
         """
         r, c = pos
         new_piece = Piece(player, pos)
+        for direction in DIRECTION_LIST:
+            y, x = direction
+            if self._grid[r + y][c + x]:
+                new_piece.adjacent[r + y][c + x] = self.get_piece((r + y, c + x))
+                self.get_piece((r + y, c + x)).adjacent[r][c] = new_piece
+                
         self._grid[r][c] = player
         self._pieces.append(new_piece)
+        self._edgepieces.append(new_piece)
 
     def get_piece(self, pos: Tuple[int, int]) -> Optional[int]:
         """
@@ -91,10 +130,12 @@ class Piece:
 
     _player: int
     _pos: Tuple[int, int]
+    adjacent: dict[Tuple[int, int], "Piece"]
 
     def __init__(self, player: int, pos: Tuple[int, int]):
         self._player = player
         self._pos = pos
+        self.adjacent = {}
 
     @property
     def player(self):

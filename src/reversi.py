@@ -368,7 +368,9 @@ class Reversi(ReversiBase):
             if center_filled:
                 self.first_two = False
         else:
-            for piece in self._board.pieces:
+            for piece in self._board.edge_pieces:
+                if not piece.player == turn:
+                    
 
         
 
