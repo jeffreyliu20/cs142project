@@ -6,6 +6,8 @@ a Reversi class that inherits from this base class.
 """
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional
+from mocks import Board, Piece
+from copy import deepcopy
 
 BoardGridType = List[List[Optional[int]]]
 """
@@ -286,6 +288,38 @@ class Reversi(ReversiBase):
         """
         super().__init__(side, players, othello)
 
+        if side <= players:
+            raise ValueError("Side length must be greater than number of players.")
+        if side % 2 == 1:
+            raise ValueError("Odd side lengths not permitted.")
+        
+        self._board = Board(side)
+        self._turn = 1
+        self._done = False
+        self._outcome = []
+        self.first_two = True
+
+        if othello:
+            self._board.add_piece(2, (side // 2 - 1, side // 2 - 1))
+            self._board.add_piece(2, (side // 2, side // 2))
+            self._board.add_piece(1, (side // 2, side // 2 - 1))
+            self._board.add_piece(1, (side // 2 - 1, side // 2))
+            self.first_two = False
+
+    @property
+    def size(self) -> int:
+        """
+        Returns the size of the board (the number of squares per side)
+        """
+        return self._side
+
+    @property
+    def num_players(self) -> int:
+        """
+        Returns the number of players
+        """
+        return self._players
+    
     @property
     @abstractmethod
     def grid(self) -> BoardGridType:
@@ -296,7 +330,7 @@ class Reversi(ReversiBase):
         meaning there is no piece in that location. Players are
         numbered from 1.
         """
-        raise NotImplementedError
+        return self._board.grid
 
     @property
     @abstractmethod
@@ -309,7 +343,7 @@ class Reversi(ReversiBase):
         If the game is over, this property will not return
         any meaningful value.
         """
-        raise NotImplementedError
+        return self._turn
 
     @property
     @abstractmethod
@@ -321,7 +355,22 @@ class Reversi(ReversiBase):
         If the game is over, this property will not return
         any meaningful value.
         """
-        raise NotImplementedError
+        if self.done:
+            return []
+        move_list = []
+        if self.first_two:
+            center_filled = True
+            for r in range(self.size // 2 - 1, self.size // 2 + 1):
+                for c in range(self.size // 2 - 1, self.size // 2 + 1):
+                    if not self.grid[r][c]:
+                        move_list.append((r, c))
+                        center_filled = False
+            if center_filled:
+                self.first_two = False
+        else:
+            for piece in self._board.pieces:
+
+        
 
     @property
     @abstractmethod
@@ -329,7 +378,7 @@ class Reversi(ReversiBase):
         """
         Returns True if the game is over, False otherwise.
         """
-        raise NotImplementedError
+        return self._done
 
     @property
     @abstractmethod
@@ -343,7 +392,7 @@ class Reversi(ReversiBase):
         the list will contain more than one integer (representing
         the players who tied)
         """
-        raise NotImplementedError
+        return self._outcome
 
     #
     # METHODS
@@ -365,7 +414,7 @@ class Reversi(ReversiBase):
         return the number of the player (players are numbered
         from 1). Otherwise, return None.
         """
-        raise NotImplementedError
+        return self._board.get_piece(pos)
 
     @abstractmethod
     def legal_move(self, pos: Tuple[int, int]) -> bool:
@@ -420,6 +469,19 @@ class Reversi(ReversiBase):
         """
         raise NotImplementedError
 
+    def end_game(self, player_list: List[int]) -> None:
+        """
+        Ends the game with the specified players designated as winners by adding
+        Parameters:
+            player_list [List[int]]: list of players who won the game (or tied
+              for the win)
+            
+        Returns: nothing
+        """
+        self._done = True
+        self._outcome = player_list
+        self._turn = 1
+
     @abstractmethod
     def load_game(self, turn: int, grid: BoardGridType) -> None:
         """
@@ -444,7 +506,22 @@ class Reversi(ReversiBase):
 
         Returns: None
         """
-        raise NotImplementedError
+        if turn < 1 or turn > self.num_players:
+            raise ValueError("No such player exists")
+        
+        new_side = len(grid)
+        if new_side != self.size:
+            raise ValueError("Input is not the same size as the current board")
+        new_board = Board(new_side)
+        new_board.update_grid(grid)
+        for row in grid:
+            for square in row:
+                if square is not None and (square < 1 or 
+                                           square > self.num_players):
+                    raise ValueError("Grid contains invalid player")
+        self._board = new_board
+        self._done = False
+        self._outcome = []
 
     @abstractmethod
     def simulate_moves(self,
@@ -486,4 +563,10 @@ class Reversi(ReversiBase):
         the method was called on, reflecting the state
         of the game after applying the provided moves.
         """
-        raise NotImplementedError
+        if type(moves) == Tuple[int, int]:
+            raise ValueError("Submitted a single tuple instead of a list")
+        
+        new_game = deepcopy(self)
+        for move in moves:
+            new_game.apply_move(move)
+        return new_game
