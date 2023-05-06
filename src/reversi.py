@@ -101,8 +101,8 @@ class Board:
         for direction in DIRECTION_LIST:
             y, x = direction
             if self._grid[r + y][c + x]:
-                new_piece.adjacent[(r + y, c + x)] = self.get_piece((r + y, c + x))
-                self.get_piece((r + y, c + x)).adjacent[(r, c)] = new_piece
+                new_piece.adjacent[(y, x)] = self.get_piece((r + y, c + x))
+                self.get_piece((r + y, c + x)).adjacent[(-y, -x)] = new_piece
                 
         self._grid[r][c] = player
         self._pieces[(r, c)] = new_piece
@@ -462,7 +462,6 @@ class Reversi(ReversiBase):
         return self._players
     
     @property
-    @abstractmethod
     def grid(self) -> BoardGridType:
         """
         Returns the state of the game board as a list of lists.
@@ -474,7 +473,6 @@ class Reversi(ReversiBase):
         return self._board.grid
 
     @property
-    @abstractmethod
     def turn(self) -> int:
         """
         Returns the player number for the player who must make
@@ -486,8 +484,31 @@ class Reversi(ReversiBase):
         """
         return self._turn
 
+    def piece_works(self, piece: "Piece") -> ListMovesType:
+        """
+        Returns a list of moves that are possible adjacent to a given piece
+        
+        Parameters:
+            piece[Piece]: a piece on the board
+            
+        Returns[ListMovesType]: all available moves where the input piece is
+        the first to be flipped"""
+
+        final_list = []
+
+        for dir in DIRECTION_LIST:
+            r, c = piece.pos
+            y, x = dir
+            if self.grid[r + y][c + x]:
+                if self.grid[r + y][c + x] == self.turn:
+                    final_list.append((r, c))
+                else:
+                    if len(self.piece_works(piece.adjacent[dir])) > 0:
+                        final_list.append(self.piece_works(piece.adjacent[dir]))
+        
+        return final_list
+    
     @property
-    @abstractmethod
     def available_moves(self) -> ListMovesType:
         """
         Returns the list of positions where the current player
@@ -508,12 +529,15 @@ class Reversi(ReversiBase):
                         center_filled = False
             if center_filled:
                 self.first_two = False
+        if not self.first_two:
+            for piece in self._board.edge_pieces:
+                for move in self.piece_works(piece):
+                    if move not in move_list:
+                        move_list.append(move)
+        return move_list
 
-
-        
 
     @property
-    @abstractmethod
     def done(self) -> bool:
         """
         Returns True if the game is over, False otherwise.
@@ -521,7 +545,6 @@ class Reversi(ReversiBase):
         return self._done
 
     @property
-    @abstractmethod
     def outcome(self) -> List[int]:
         """
         Returns the list of winners for the game. If the game
@@ -538,7 +561,6 @@ class Reversi(ReversiBase):
     # METHODS
     #
 
-    @abstractmethod
     def piece_at(self, pos: Tuple[int, int]) -> Optional[int]:
         """
         Returns the piece at a given location
@@ -556,7 +578,6 @@ class Reversi(ReversiBase):
         """
         return self._board.get_piece(pos)
 
-    @abstractmethod
     def legal_move(self, pos: Tuple[int, int]) -> bool:
         """
         Checks if a move is legal.
@@ -572,9 +593,8 @@ class Reversi(ReversiBase):
         method) could place a piece in the specified position,
         return True. Otherwise, return False.
         """
-        raise NotImplementedError
+        return pos in self.available_moves
 
-    @abstractmethod
     def apply_move(self, pos: Tuple[int, int]) -> None:
         """
         Place a piece of the current player (as returned
@@ -607,22 +627,34 @@ class Reversi(ReversiBase):
 
         Returns: None
         """
-        raise NotImplementedError
+        if pos in self.available_moves:
+            self._board.add_piece(self.turn, pos)
+            if len(self._board.pieces) == self.size ** 2:
+                self.end_game()
+            if self._turn < self.num_players:
+                self._turn += 1
+            else:
+                self._turn = 1
+        else:
+            print("Invalid move")
 
-    def end_game(self, player_list: List[int]) -> None:
+    def end_game(self) -> None:
         """
-        Ends the game with the specified players designated as winners by adding
-        Parameters:
-            player_list [List[int]]: list of players who won the game (or tied
-              for the win)
+        Ends the game
+        Parameters: None
             
         Returns: nothing
         """
+        final_dict = {}
+        for i in range(1, self.num_players + 1):
+            final_dict[i] = 0
+        for piece in self._board.pieces:
+            final_dict[piece.player] += 1
+        self._outcome = max(final_dict, key = final_dict.get)
         self._done = True
-        self._outcome = player_list
+        
         self._turn = 1
 
-    @abstractmethod
     def load_game(self, turn: int, grid: BoardGridType) -> None:
         """
         Loads the state of a game, replacing the current
@@ -663,7 +695,6 @@ class Reversi(ReversiBase):
         self._done = False
         self._outcome = []
 
-    @abstractmethod
     def simulate_moves(self,
                        moves: ListMovesType
                        ) -> "ReversiBase":
