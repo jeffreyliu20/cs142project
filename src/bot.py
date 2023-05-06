@@ -5,7 +5,7 @@ Currently only functional for the ReversiStub class.
 """
 import sys
 from reversi import ReversiBase
-from mocks import ReversiStub
+from mocks import ReversiStub, ReversiBotMock
 from typing import Tuple
 import random
 
@@ -18,7 +18,31 @@ def choose_random_move(revers: ReversiBase) -> Tuple[int, int]:
     
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
+    print("player 1: " + str(revers.available_moves))
     return random.choice(revers.available_moves)
+
+def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
+    """
+    Chooses the move that will take the most pieces in a Reversi game
+    
+    Parameters:
+        revers[ReversiBase]: a reversi game
+        
+    Returns[Tuple[int, int]]: coordinates corresponding to a move
+    """
+    print("player 2: " + str(revers.available_moves))
+    move_n = {}
+    for move in revers.available_moves:
+        n = 0
+        simulated_game = revers.simulate_moves([move])
+        for row in simulated_game.grid:
+            for piece in row:
+                if piece == revers.turn:
+                    n += 1
+        move_n[move] = n
+
+    return max(move_n, key=move_n.get)
+
 
 def play_game() -> str:
     """
@@ -28,16 +52,21 @@ def play_game() -> str:
     
     Returns [str]: "Player X wins" where x is the winning player or "Tie"
     """
-    game = ReversiStub(side=8, players=2, othello=False)
+    game = ReversiBotMock(side=8, players=2, othello=True)
 
     while not game.done:
-        move = choose_random_move(game)
+        if game.turn == 1:
+            move = choose_random_move(game)
+        elif game.turn == 2:
+            move = choose_high_n_move(game)
         game.apply_move(move)
 
     if len(game.outcome) > 1:
         return "Tie"
     winning_player = str(game.outcome[0])
     return f"Player {winning_player} wins"
+
+
 
 if len(sys.argv) != 2:
     raise ValueError("bot.py only accepts one input (number of games)")

@@ -53,6 +53,16 @@ class Board:
         return self._grid
     
     @property
+    def size(self) -> int:
+        """
+        Returns the side length of the grid
+        
+        Parameters: none beyond self
+        Returns[int]: grid size
+        """
+        return len(self._grid)
+    
+    @property
     def pieces(self) -> List["Piece"]:
         """
         Returns a copy of the board's piece list
@@ -100,7 +110,8 @@ class Board:
         new_piece = Piece(player, pos)
         for direction in DIRECTION_LIST:
             y, x = direction
-            if self._grid[r + y][c + x]:
+            if (0 <= r + y < self.size 
+                and 0 <= c + x < self.size) and self._grid[r + y][c + x]:
                 new_piece.adjacent[(y, x)] = self.get_piece((r + y, c + x))
                 self.get_piece((r + y, c + x)).adjacent[(-y, -x)] = new_piece
                 
