@@ -115,7 +115,7 @@ class Board:
             pos[Tuple[int]]: coordinates within the grid
         Returns: a piece if there is one at the coordinates, None if not
         """
-        return self._pieces[pos]
+        return self._pieces.get(pos)
     
     def update_grid(self, grid: BoardGridType) -> None:
         """

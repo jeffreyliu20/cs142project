@@ -50,7 +50,7 @@ class Board:
         return self._pieces
     
     @property
-    def edge_pieces(self) -> List["Piece":]
+    def edge_pieces(self) -> List["Piece"]:
         """
         Returns a list of the pieces on a board that are not completely
         surrounded by other pieces

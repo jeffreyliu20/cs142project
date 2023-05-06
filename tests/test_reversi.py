@@ -30,7 +30,7 @@ def test_create_2():
     """
     Test whether we can correctly create an Othello 6x6 game
     """
-    reversi = Reversi(side=6, players=2, othello=False)
+    reversi = Reversi(side=6, players=2, othello=True)
 
     grid = reversi.grid
 
@@ -107,7 +107,7 @@ def test_piece_at_1():
             ), f"Expected piece_at(({r},{c})) to return None but got {piece}"
 
     for r, c, expected_piece in othello_pos:
-        piece = reversi.piece_at((r, c))
+        piece = reversi.piece_at((r, c)).player
         assert (
             piece == expected_piece
         ), f"Expected piece_at(({r},{c})) to return {expected_piece} but got {piece}"
