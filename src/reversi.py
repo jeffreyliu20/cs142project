@@ -484,29 +484,28 @@ class Reversi(ReversiBase):
         """
         return self._turn
 
-    def piece_works(self, piece: "Piece") -> ListMovesType:
+    def move_works(self, piece: "Piece", 
+                    dir: Tuple[int, int]) -> Optional[Tuple[int, int]]:
         """
-        Returns a list of moves that are possible adjacent to a given piece
+        Returns the coordinate of a move if there is one a certain direction
+        adjacent to a certain piece
         
         Parameters:
             piece[Piece]: a piece on the board
+            dir[Tuple[int, int]]: coordinates indicating a direction
             
-        Returns[ListMovesType]: all available moves where the input piece is
-        the first to be flipped"""
+        Returns: coordinates if the move works, None if not
+        """
 
-        final_list = []
-
-        for dir in DIRECTION_LIST:
-            r, c = piece.pos
-            y, x = dir
-            if self.grid[r + y][c + x]:
-                if self.grid[r + y][c + x] == self.turn:
-                    final_list.append((r, c))
-                else:
-                    if len(self.piece_works(piece.adjacent[dir])) > 0:
-                        final_list.append(self.piece_works(piece.adjacent[dir]))
-        
-        return final_list
+        r, c = piece.pos
+        y, x = dir
+        if self.grid[r + y][c + x] and not self.grid[r][c] == self.turn:
+            if self.grid[r + y][c + x] == self.turn:
+                return(r - y, c - x)
+            else:
+                return self.move_works(piece.adjacent[dir], dir)
+        else:
+            return None
     
     @property
     def available_moves(self) -> ListMovesType:
@@ -531,9 +530,9 @@ class Reversi(ReversiBase):
                 self.first_two = False
         if not self.first_two:
             for piece in self._board.edge_pieces:
-                for move in self.piece_works(piece):
-                    if move not in move_list:
-                        move_list.append(move)
+                for dir in DIRECTION_LIST:
+                    if self.move_works(piece, dir):
+                        move_list.append(self.move_works(piece, dir))
         return move_list
 
 
