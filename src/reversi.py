@@ -6,7 +6,6 @@ a Reversi class that inherits from this base class.
 """
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional
-from mocks import Board, Piece
 from copy import deepcopy
 
 BoardGridType = List[List[Optional[int]]]
@@ -23,6 +22,148 @@ ListMovesType = List[Tuple[int, int]]
 Type for representing lists of moves on the board.
 """
 
+DIRECTION_LIST = ((1, 1), (0, 1), (1, 0), (-1, -1), (0, -1), (-1, 0), (1, -1),
+                  (-1, 1))
+
+class Board:
+    """
+    Class to contain a board.
+    The board is a grid where each square in the grid is mapped to "None" if no
+    move has been made there or a piece otherwise.
+    """
+
+    _grid: BoardGridType
+    _pieces: List["Piece"]
+    _edgepieces: List["Piece"]
+
+    def __init__(self, side: int):
+        self._grid = [[None]*side for _ in range(side)]
+        self._pieces = {}
+        self._edgepieces = []
+
+
+    @property
+    def grid(self) -> BoardGridType:
+        """
+        Returns a copy of the board's grid
+        
+        Parameters: none beyond self
+        Returns[BoardGridType]: a grid
+        """
+        return self._grid
+    
+    @property
+    def pieces(self) -> List["Piece"]:
+        """
+        Returns a copy of the board's piece list
+        
+        Parameters: none beyond self
+        Returns[List[Piece]]: a list of the pieces in the board
+        """
+        return list(self._pieces.values())
+    
+    @property
+    def edge_pieces(self) -> List["Piece"]:
+        """
+        Returns a list of the pieces on a board that are not completely
+        surrounded by other pieces
+        
+        Parameters: none beyond self
+        Returns[List[Piece]]: a list of pieces on the edge of the board
+        """
+        self.update_edge_pieces()
+        return self._edgepieces
+    
+
+    def update_edge_pieces(self) -> None:
+        """
+        Removes pieces that are not on the edge from the list of edge pieces
+        
+        Parameters: none beyond self
+        Returns: None
+        """
+        final_list = self._edgepieces
+        for piece in self._edgepieces:
+            if len(piece.adjacent) == 8:
+                final_list.remove(piece)
+        self._edgepieces = final_list
+    
+    def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
+        """
+        Adds a piece to a specified position on the board
+        Parameters:
+            player [int]: the integer associated with the player adding the piece
+            pos [Tuple[int]]: coordinates within the grid
+        Returns: nothing
+        """
+        r, c = pos
+        new_piece = Piece(player, pos)
+        for direction in DIRECTION_LIST:
+            y, x = direction
+            if self._grid[r + y][c + x]:
+                new_piece.adjacent[(r + y, c + x)] = self.get_piece((r + y, c + x))
+                self.get_piece((r + y, c + x)).adjacent[(r, c)] = new_piece
+                
+        self._grid[r][c] = player
+        self._pieces[(r, c)] = new_piece
+        self._edgepieces.append(new_piece)
+
+    def get_piece(self, pos: Tuple[int, int]) -> Optional["Piece"]:
+        """
+        Finds the piece at a specified point in the board
+        Parameters:
+            pos[Tuple[int]]: coordinates within the grid
+        Returns: a piece if there is one at the coordinates, None if not
+        """
+        return self._pieces[pos]
+    
+    def update_grid(self, grid: BoardGridType) -> None:
+        """
+        Gets rid of the old version of the grid and loads a new one
+        Parameters:
+            grid[BoardGridType]: a valid grid with the same side length as the board
+        Returns: nothing
+        """
+        if len(grid) != len(self._grid):
+            raise ValueError("Cannot change board size")
+        
+        self._pieces = {}
+        for r, row in enumerate(grid):
+            for c, square in enumerate(row):
+                if square:
+                    self._pieces[(r, c)] = Piece(square, (r, c))
+        self._grid = grid
+        
+
+class Piece:
+    """
+    Class to contain a piece
+    """
+
+    _player: int
+    _pos: Tuple[int, int]
+    adjacent: dict[Tuple[int, int], "Piece"]
+
+    def __init__(self, player: int, pos: Tuple[int, int]):
+        self._player = player
+        self._pos = pos
+        self.adjacent = {}
+
+    @property
+    def player(self):
+        """
+        Which player played this piece
+        Paramters: None beyond self
+        Returns [int]: player name
+        """
+        return self._player
+    
+    @property
+    def pos(self):
+        """
+        Where on its board the piece is located
+        """
+        return self._pos
 
 class ReversiBase(ABC):
     """
@@ -367,10 +508,7 @@ class Reversi(ReversiBase):
                         center_filled = False
             if center_filled:
                 self.first_two = False
-        else:
-            for piece in self._board.edge_pieces:
-                if not piece.player == turn:
-                    
+
 
         
 
