@@ -18,7 +18,6 @@ def choose_random_move(revers: ReversiBase) -> Tuple[int, int]:
     
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
-    print("player 1: " + str(revers.available_moves))
     return random.choice(revers.available_moves)
 
 def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
@@ -30,7 +29,6 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
         
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
-    print("player 2: " + str(revers.available_moves))
     move_n = {}
     for move in revers.available_moves:
         n = 0
