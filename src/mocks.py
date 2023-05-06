@@ -94,6 +94,16 @@ class Board:
         self._grid[r][c] = player
         self._pieces.append(new_piece)
         self._edgepieces.append(new_piece)
+    
+    def update_piece(self, pos: Tuple[int, int], player: int):
+        """
+        Changes the piece at a given point in the grid to a different player
+        """
+        r, c = pos
+        if self._grid[r][c]:
+            self._grid[r][c] = player
+        else:
+            print("No piece at that position")
 
     def get_piece(self, pos: Tuple[int, int]) -> Optional[int]:
         """
@@ -545,3 +555,84 @@ class ReversiMock(ReversiBase):
         for move in moves:
             new_game.apply_move(move)
         return new_game
+    
+
+class ReversiBotMock(ReversiMock):
+    """
+    revision of the mock that allows for better bot testing
+    """
+
+    @property
+    def done(self) -> bool:
+        """
+        Returns True if the game is over, False otherwise.
+        """
+        return len(self._board.pieces) == self.size ** 2
+    
+    @property
+    def available_moves(self) -> ListMovesType:
+        """
+        Returns the list of positions where the current player
+        (as returned by the turn method) could place a piece.
+
+        If the game is over, this property will not return
+        any meaningful value.
+        """
+        if self.done:
+            return []
+        move_list = []
+        for piece in self._board.pieces:
+            r, c = piece.pos
+            for x in range(-1, 2):
+                for y in range(-1, 2):
+                    if not (self.grid[r + x][c + y] or 
+                            (r + x, c + y) in move_list):
+                        move_list.append((r + x, c + y))
+        return move_list
+    
+    def apply_move(self, pos: Tuple[int, int]) -> None:
+        """
+        Place a piece of the current player (as returned
+        by the turn method) on the board.
+
+        The provided position is assumed to be a legal
+        move (as returned by available_moves, or checked
+        by legal_move). The behaviour of this method
+        when the position is on the board, but is not
+        a legal move, is undefined.
+
+        After applying the move, the turn is updated to the
+        next player who can make a move. For example, in a 4
+        player game, suppose it is player 1's turn, they
+        apply a move, and players 2 and 3 have no possible
+        moves, but player 4 does. After player 1's move,
+        the turn would be set to 4 (not to 2).
+
+        If, after applying the move, none of the players
+        can make a move, the game is over, and the value
+        of the turn becomes moot. It cannot be assumed to
+        take any meaningful value.
+
+        Args:
+            pos: Position on the board
+
+        Raises:
+            ValueError: If the specified position is outside
+            the bounds of the board.
+
+        Returns: None
+        """
+        self._board.add_piece(self.turn, pos)
+        for dir in DIRECTION_LIST:
+            r, c = pos
+            y, x = dir
+            if self._board.grid[r + y][c + x]:
+                self._board.update_piece((r + y, c + x), self.turn)
+        if pos == (0, 0):
+            self.end_game([self.turn])
+        if pos == (self.size - 1, self.size - 1):
+            self.end_game([i for i in range(1, self.num_players + 1)])
+        if self._turn < self.num_players:
+            self._turn += 1
+        else:
+            self._turn = 1

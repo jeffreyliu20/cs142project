@@ -108,6 +108,17 @@ class Board:
         self._pieces[(r, c)] = new_piece
         self._edgepieces.append(new_piece)
 
+    def update_piece(self, pos: Tuple[int, int], player: int):
+        """
+        Changes the piece at a given point in the grid to a different player
+        """
+        r, c = pos
+        if self._grid[r][c]:
+            self._grid[r][c] = player
+            self._pieces[(r, c)].update_player(player)
+        else:
+            print("No piece at that position")
+
     def get_piece(self, pos: Tuple[int, int]) -> Optional["Piece"]:
         """
         Finds the piece at a specified point in the board
@@ -150,7 +161,7 @@ class Piece:
         self.adjacent = {}
 
     @property
-    def player(self):
+    def player(self) -> int:
         """
         Which player played this piece
         Paramters: None beyond self
@@ -159,11 +170,22 @@ class Piece:
         return self._player
     
     @property
-    def pos(self):
+    def pos(self) -> Tuple[int, int]:
         """
         Where on its board the piece is located
         """
         return self._pos
+    
+    def update_player(self, player: int) -> None:
+        """
+        Changes the player attribute to a new value
+        
+        Parameters:
+            player[int]: a player in the game
+            
+        Returns: nothing
+        """
+        self._player = player
 
 class ReversiBase(ABC):
     """
@@ -506,6 +528,40 @@ class Reversi(ReversiBase):
                 return self.move_works(piece.adjacent[dir], dir)
         else:
             return None
+        
+    def find_moves(self) -> dict[Tuple[int, int], List[Tuple[int, int]]]:
+        """
+        Finds all valid moves in a board
+        
+        Parameters: none beyond self
+        Returns[dict]: A dictionary that maps a direction in which the move can 
+        flip pieces to a list of possible moves dependent on that direction 
+        (Note that the direction is not meaningful for the first two moves)
+        """
+
+        if self.done:
+            return {}
+        move_list = {}
+        if self.first_two:
+            center_filled = True
+            for r in range(self.size // 2 - 1, self.size // 2 + 1):
+                for c in range(self.size // 2 - 1, self.size // 2 + 1):
+                    if not self.grid[r][c]:
+                        move_list[(r, c)] = ((r, c))
+                        center_filled = False
+            if center_filled:
+                self.first_two = False
+        if not self.first_two:
+            for piece in self._board.edge_pieces:
+                for dir in DIRECTION_LIST:
+                    if self.move_works(piece, dir):
+                        r, c = piece.pos
+                        y, x = dir
+                        if dir in move_list:
+                            move_list[dir].append((r - y, c - x))
+                        else:
+                            move_list[dir] = [(r - y, c - x)]
+        return move_list
     
     @property
     def available_moves(self) -> ListMovesType:
@@ -516,23 +572,11 @@ class Reversi(ReversiBase):
         If the game is over, this property will not return
         any meaningful value.
         """
-        if self.done:
-            return []
         move_list = []
-        if self.first_two:
-            center_filled = True
-            for r in range(self.size // 2 - 1, self.size // 2 + 1):
-                for c in range(self.size // 2 - 1, self.size // 2 + 1):
-                    if not self.grid[r][c]:
-                        move_list.append((r, c))
-                        center_filled = False
-            if center_filled:
-                self.first_two = False
-        if not self.first_two:
-            for piece in self._board.edge_pieces:
-                for dir in DIRECTION_LIST:
-                    if self.move_works(piece, dir):
-                        move_list.append(self.move_works(piece, dir))
+        for dir_moves in list(self.find_moves().values()):
+            for move in dir_moves:
+                if move not in move_list:
+                    move_list.append(move)
         return move_list
 
 
@@ -628,6 +672,22 @@ class Reversi(ReversiBase):
         """
         if pos in self.available_moves:
             self._board.add_piece(self.turn, pos)
+            for dir in DIRECTION_LIST:
+                if dir in self.find_moves():
+                    if pos in self.find_moves()[dir]:
+                        r, c = pos
+                        y, x = dir
+                        new_y = r + y
+                        new_x = c + x
+                        while True:
+                            if self._board.grid[new_y][new_x] != self.turn:
+                                self._board.update_piece((new_y, new_x), 
+                                                         self.turn)
+                                new_y += y
+                                new_x += x
+                            else:
+                                break
+
             if len(self._board.pieces) == self.size ** 2:
                 self.end_game()
             if self._turn < self.num_players:
