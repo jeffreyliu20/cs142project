@@ -35,11 +35,10 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
         simulated_game = revers.simulate_moves([move])
         for row in simulated_game.grid:
             for piece in row:
-                if piece == revers.turn:
+                if piece == simulated_game.turn:
                     n += 1
         move_n[move] = n
-
-    return max(move_n, key=move_n.get)
+    return max(move_n, key= lambda x: move_n[x])
 
 
 def play_game() -> str:
@@ -58,8 +57,6 @@ def play_game() -> str:
         elif game.turn == 2:
             move = choose_high_n_move(game)
         game.apply_move(move)
-
-    print("game over")
 
     if len(game.outcome) > 1:
         return "Tie"

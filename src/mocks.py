@@ -20,12 +20,12 @@ class Board:
     """
 
     _grid: BoardGridType
-    _pieces: List["Piece"]
+    _piece_grid: List[List["Piece"]]
     _edgepieces: List["Piece"]
 
     def __init__(self, side: int):
         self._grid = [[None]*side for _ in range(side)]
-        self._pieces = {}
+        self._piece_grid = [[None]*side for _ in range(side)]
         self._edgepieces = []
 
 
@@ -57,7 +57,12 @@ class Board:
         Parameters: none beyond self
         Returns[List[Piece]]: a list of the pieces in the board
         """
-        return list(self._pieces.values())
+        final_list = []
+        for row in self._piece_grid:
+            for piece in row:
+                if piece:
+                    final_list.append(piece)
+        return final_list
     
     @property
     def edge_pieces(self) -> List["Piece"]:
@@ -95,6 +100,7 @@ class Board:
         """
         r, c = pos
         new_piece = Piece(player, pos)
+        self.piece_reset()
         for direction in DIRECTION_LIST:
             y, x = direction
             if (0 <= r + y < self.size 
@@ -103,7 +109,7 @@ class Board:
                 self.get_piece((r + y, c + x)).adjacent[(-y, -x)] = new_piece
                 
         self._grid[r][c] = player
-        self._pieces[(r, c)] = new_piece
+        self.piece_reset()
         self._edgepieces.append(new_piece)
 
     def update_piece(self, pos: Tuple[int, int], player: int):
@@ -113,7 +119,7 @@ class Board:
         r, c = pos
         if self._grid[r][c]:
             self._grid[r][c] = player
-            self._pieces[(r, c)].update_player(player)
+            self._piece_grid[r][c].update_player(player)
         else:
             print("No piece at that position")
 
@@ -124,7 +130,25 @@ class Board:
             pos[Tuple[int]]: coordinates within the grid
         Returns: a piece if there is one at the coordinates, None if not
         """
-        return self._pieces.get(pos)
+        r, c = pos
+        return self._piece_grid[r][c]
+    
+    def piece_reset(self) -> None:
+        """"
+        Resets the piece_grid attribute to match the grid attribute
+        """
+        self._piece_grid = [[None]*self.size for _ in range(self.size)]
+        for r, row in enumerate(self.grid):
+            for c, square in enumerate(row):
+                if square:
+                    self._piece_grid[r][c] = Piece(square, (r, c))
+        for piece in self.pieces:
+            for dir in DIRECTION_LIST:
+                r, c = piece.pos
+                y, x = dir
+                if (0 <= r + y < self.size 
+                and 0 <= c + x < self.size) and self._piece_grid[r + y][c + x]:
+                    piece.adjacent[(y, x)] = self._piece_grid[r + y][c + x]
     
     def update_grid(self, grid: BoardGridType) -> None:
         """
@@ -135,13 +159,8 @@ class Board:
         """
         if len(grid) != len(self._grid):
             raise ValueError("Cannot change board size")
-        
-        self._pieces = {}
-        for r, row in enumerate(grid):
-            for c, square in enumerate(row):
-                if square:
-                    self._pieces[(r, c)] = Piece(square, (r, c))
         self._grid = grid
+        self.piece_reset()
         
 
 class Piece:
@@ -589,7 +608,12 @@ class ReversiBotMock(ReversiMock):
         """
         Returns True if the game is over, False otherwise.
         """
-        return len(self._board.pieces) == self.size ** 2
+        done = True
+        for row in self.grid:
+            for piece in row:
+                if piece is None:
+                    done = False
+        return done
     
     @property
     def available_moves(self) -> ListMovesType:
@@ -609,8 +633,8 @@ class ReversiBotMock(ReversiMock):
                 y, x = dir
                 if ((0 <= r + y < self.size 
                     and 0 <= c + x < self.size) 
-                    and not (self.grid[r + y][c + x] or (r + y, c + x) in 
-                             move_list)):
+                    and not (self.grid[r + y][c + x] or ((r + y, c + x) in 
+                             move_list))):
                     move_list.append((r + y, c + x))
         return move_list
     
@@ -670,3 +694,48 @@ class ReversiBotMock(ReversiMock):
             self._turn += 1
         else:
             self._turn = 1
+
+    def simulate_moves(self, moves: ListMovesType) -> "ReversiBase":
+        """
+        Simulates the effect of making a sequence of moves,
+        **without** altering the state of the game (instead,
+        returns a new object with the result of applying
+        the provided moves).
+
+        The provided positions are assumed to be legal
+        moves. The behaviour of this method when a
+        position is on the board, but is not a legal
+        move, is undefined.
+
+        Bear in mind that the number of *turns* involved
+        might be larger than the number of moves provided,
+        because a player might not be able to make a
+        move (in which case, we skip over the player).
+        Let's say we provide moves (2,3), (3,2), and (1,2)
+        in a 3 player game, that it is player 2's turn,
+        and that Player 3 won't be able to make any moves.
+        The moves would be processed like this:
+
+        - Player 2 makes move (2, 3)
+        - Player 3 can't make any moves
+        - Player 1 makes move (3, 2)
+        - Player 2 makes move (1, 2)
+
+        Args:
+            moves: List of positions, representing moves.
+
+        Raises:
+            ValueError: If any of the specified positions
+            is outside the bounds of the board.
+
+        Returns: An object of the same type as the object
+        the method was called on, reflecting the state
+        of the game after applying the provided moves.
+        """
+        if type(moves) == Tuple[int, int]:
+            raise ValueError("Submitted a single tuple instead of a list")
+        
+        new_game = deepcopy(self)
+        for move in moves:
+            new_game.apply_move(move)
+        return new_game
