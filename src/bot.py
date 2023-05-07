@@ -59,10 +59,13 @@ def play_game() -> str:
             move = choose_high_n_move(game)
         game.apply_move(move)
 
+    print("game over")
+
     if len(game.outcome) > 1:
         return "Tie"
     winning_player = str(game.outcome[0])
     return f"Player {winning_player} wins"
+
 
 
 

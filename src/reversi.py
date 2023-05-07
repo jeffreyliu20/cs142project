@@ -33,7 +33,7 @@ class Board:
     """
 
     _grid: BoardGridType
-    _pieces: List["Piece"]
+    _pieces: dict[Tuple[int, int], "Piece"]
     _edgepieces: List["Piece"]
 
     def __init__(self, side: int):

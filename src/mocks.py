@@ -654,9 +654,17 @@ class ReversiBotMock(ReversiMock):
                 and 0 <= c + x < self.size) and self._board.grid[r + y][c + x]:
                 self._board.update_piece((r + y, c + x), self.turn)
         if self.done:
-            if self.grid[0][0]:
-                self.end_game([self.grid[0][0]])
-            elif self.grid[self.size - 1, self.size - 1]:
+            n = 0
+            for piece in self._board.pieces:
+                if piece.player == 1:
+                    n += 1
+                if piece.player == 2:
+                    n -= 1
+            if n > 0:
+                self.end_game([1])
+            if n < 0:
+                self.end_game([2])
+            if n == 0:
                 self.end_game([1, 2])
         if self._turn < self.num_players:
             self._turn += 1
