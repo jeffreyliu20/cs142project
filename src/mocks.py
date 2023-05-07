@@ -20,13 +20,11 @@ class Board:
     """
 
     _grid: BoardGridType
-    _piece_grid: List[List["Piece"]]
-    _edgepieces: List["Piece"]
+    _filled_list: ListMovesType
 
     def __init__(self, side: int):
         self._grid = [[None]*side for _ in range(side)]
-        self._piece_grid = [[None]*side for _ in range(side)]
-        self._edgepieces = []
+        self._filled_list = []
 
 
     @property
@@ -50,45 +48,15 @@ class Board:
         return len(self._grid)
     
     @property
-    def pieces(self) -> List["Piece"]:
+    def pieces(self) -> int:
         """
-        Returns a copy of the board's piece list
+        Returns the list of coordinates at which there are pieces
         
         Parameters: none beyond self
-        Returns[List[Piece]]: a list of the pieces in the board
+        Returns: nothing
         """
-        final_list = []
-        for row in self._piece_grid:
-            for piece in row:
-                if piece:
-                    final_list.append(piece)
-        return final_list
+        return self._filled_list
     
-    @property
-    def edge_pieces(self) -> List["Piece"]:
-        """
-        Returns a list of the pieces on a board that are not completely
-        surrounded by other pieces
-        
-        Parameters: none beyond self
-        Returns[List[Piece]]: a list of pieces on the edge of the board
-        """
-        self.update_edge_pieces()
-        return self._edgepieces
-    
-
-    def update_edge_pieces(self) -> None:
-        """
-        Removes pieces that are not on the edge from the list of edge pieces
-        
-        Parameters: none beyond self
-        Returns: None
-        """
-        final_list = self._edgepieces
-        for piece in self._edgepieces:
-            if len(piece.adjacent) == 8:
-                final_list.remove(piece)
-        self._edgepieces = final_list
     
     def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
         """
@@ -99,18 +67,14 @@ class Board:
         Returns: nothing
         """
         r, c = pos
-        new_piece = Piece(player, pos)
-        self.piece_reset()
+        self._grid[r][c] = player
+        self._filled_list.append((r, c))
         for direction in DIRECTION_LIST:
             y, x = direction
             if (0 <= r + y < self.size 
                 and 0 <= c + x < self.size) and self._grid[r + y][c + x]:
-                new_piece.adjacent[(y, x)] = self.get_piece((r + y, c + x))
-                self.get_piece((r + y, c + x)).adjacent[(-y, -x)] = new_piece
+                self._grid[r + y][c + x] = player
                 
-        self._grid[r][c] = player
-        self.piece_reset()
-        self._edgepieces.append(new_piece)
 
     def update_piece(self, pos: Tuple[int, int], player: int):
         """
@@ -119,7 +83,6 @@ class Board:
         r, c = pos
         if self._grid[r][c]:
             self._grid[r][c] = player
-            self._piece_grid[r][c].update_player(player)
         else:
             print("No piece at that position")
 
@@ -131,24 +94,7 @@ class Board:
         Returns: a piece if there is one at the coordinates, None if not
         """
         r, c = pos
-        return self._piece_grid[r][c]
-    
-    def piece_reset(self) -> None:
-        """"
-        Resets the piece_grid attribute to match the grid attribute
-        """
-        self._piece_grid = [[None]*self.size for _ in range(self.size)]
-        for r, row in enumerate(self.grid):
-            for c, square in enumerate(row):
-                if square:
-                    self._piece_grid[r][c] = Piece(square, (r, c))
-        for piece in self.pieces:
-            for dir in DIRECTION_LIST:
-                r, c = piece.pos
-                y, x = dir
-                if (0 <= r + y < self.size 
-                and 0 <= c + x < self.size) and self._piece_grid[r + y][c + x]:
-                    piece.adjacent[(y, x)] = self._piece_grid[r + y][c + x]
+        return self._grid[r][c]
     
     def update_grid(self, grid: BoardGridType) -> None:
         """
@@ -160,7 +106,11 @@ class Board:
         if len(grid) != len(self._grid):
             raise ValueError("Cannot change board size")
         self._grid = grid
-        self.piece_reset()
+        self._filled_list = []
+        for r, row in enumerate(self._grid):
+            for c, square in enumerate(row):
+                if square:
+                    self._filled_list.append((r, c))
         
 
 class Piece:
@@ -328,12 +278,14 @@ class ReversiMock(ReversiBase):
         self._turn = 1
         self._done = False
         self._outcome = []
+        self.first_two = True
 
         if othello:
             self._board.add_piece(2, (side // 2 - 1, side // 2 - 1))
             self._board.add_piece(2, (side // 2, side // 2))
             self._board.add_piece(1, (side // 2, side // 2 - 1))
             self._board.add_piece(1, (side // 2 - 1, side // 2))
+            self.first_two = False
 
     @property
     def size(self) -> int:
@@ -627,15 +579,25 @@ class ReversiBotMock(ReversiMock):
         if self.done:
             return []
         move_list = []
-        for piece in self._board.pieces:
-            r, c = piece.pos
-            for dir in DIRECTION_LIST:
-                y, x = dir
-                if ((0 <= r + y < self.size 
-                    and 0 <= c + x < self.size) 
-                    and not (self.grid[r + y][c + x] or ((r + y, c + x) in 
-                             move_list))):
-                    move_list.append((r + y, c + x))
+        if self.first_two:
+            center_filled = True
+            for r in range(self.size // 2 - 1, self.size // 2 + 1):
+                for c in range(self.size // 2 - 1, self.size // 2 + 1):
+                    if not self.grid[r][c]:
+                        move_list.append((r, c))
+                        center_filled = False
+            if center_filled:
+                self.first_two = False
+        if not self.first_two:
+            for piece in self._board.pieces:
+                r, c = piece
+                for dir in DIRECTION_LIST:
+                    y, x = dir
+                    if ((0 <= r + y < self.size 
+                        and 0 <= c + x < self.size) 
+                        and not (self.grid[r + y][c + x] or ((r + y, c + x) in 
+                                move_list))):
+                        move_list.append((r + y, c + x))
         return move_list
     
     def apply_move(self, pos: Tuple[int, int]) -> None:
@@ -679,11 +641,12 @@ class ReversiBotMock(ReversiMock):
                 self._board.update_piece((r + y, c + x), self.turn)
         if self.done:
             n = 0
-            for piece in self._board.pieces:
-                if piece.player == 1:
-                    n += 1
-                if piece.player == 2:
-                    n -= 1
+            for row in self.grid:
+                for piece in row:
+                    if piece == 1:
+                        n += 1
+                    if piece == 2:
+                        n -= 1
             if n > 0:
                 self.end_game([1])
             if n < 0:

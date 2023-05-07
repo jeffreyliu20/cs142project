@@ -35,7 +35,7 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
         simulated_game = revers.simulate_moves([move])
         for row in simulated_game.grid:
             for piece in row:
-                if piece == simulated_game.turn:
+                if piece == revers.turn:
                     n += 1
         move_n[move] = n
     return max(move_n, key= lambda x: move_n[x])
@@ -49,7 +49,7 @@ def play_game() -> str:
     
     Returns [str]: "Player X wins" where x is the winning player or "Tie"
     """
-    game = ReversiBotMock(side=8, players=2, othello=True)
+    game = ReversiBotMock(side=8, players=2, othello=False)
 
     while not game.done:
         if game.turn == 1:
