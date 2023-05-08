@@ -532,9 +532,11 @@ class Reversi(ReversiBase):
 
         r, c = piece.pos
         y, x = dir
-        if (0 <= r + y < self.size 
-                and 0 <= c + x < self.size) and (self.grid[r + y][c + x] and not
-                                                  self.grid[r][c] == self.turn):
+        if (0 <= r - y < self.size and
+             0 <= c - x < self.size and 0 <= r + y < self.size and 
+             0 <= c + x < self.size) and ((self.grid[r + y][c + x] and not
+                                           self.grid[r][c] == self.turn) 
+                                           and not self.grid[r - y][c - x]):
             if self.grid[r + y][c + x] == self.turn:
                 return(r - y, c - x)
             else:
