@@ -6,7 +6,7 @@ from reversi import BoardGridType
 
 board_size: int = int(sys.argv[1])
 num_players: int = 2
-othello: bool = False
+othello: bool = True
 
 WALL_CHARS = {
     "H_WALL": "─", "V_WALL": "│", "HV_WALL": "┼",
@@ -34,7 +34,7 @@ CLOCK_CHARS = {
     (True, True, True, True): WALL_CHARS["HV_WALL"]
 }
 
-game = ReversiStub(board_size, num_players, othello)
+game = ReversiMock(board_size, num_players, othello)
 
 if 6 <= board_size <= 20:
 
@@ -71,16 +71,58 @@ if 6 <= board_size <= 20:
             tup = (grid_dir[0], grid_dir[1], grid_dir[2], grid_dir[3])
             board[r][c] = CLOCK_CHARS[tup]
 
+    for x, row in enumerate(game.grid):
+        for y, cell in enumerate(row):
+            if game.grid[x][y] is not None:
+                board[2 * x + 1][2 * y + 1] = f"{cell}"
+
+    board_row = []
+    for row2 in board:
+        board_row.append("".join(row2))
+
+    board_str = "\n".join(board_row)
+    print(board_str)
+
+    victor = -1
+    earlyEnd = False
+
     while not game.done:
 
-        # move_r = int(input("Input row of move: "))
-        # move_c = int(input("Input column of move: "))
+        available_moves = game.available_moves
 
-        # if not game.legal_move((move_r, move_c)):
-        #     print("Not a legal move, please try again")
-        #     continue
+        print("Choose one of the following move options")
+        print()
 
-        # game.apply_move((move_r, move_c))
+        for k, move in enumerate(available_moves):
+            i, j = move
+            print(f"{k+1}) {i}, {j}")
+        
+        print()
+        print("If you want to exit the game, type 'quit' and then press Enter")
+        choice = input("Enter your choice and then press Enter: ")
+        print()
+        
+        while True:
+            if choice == "quit":
+                break
+            if choice.isdigit() and 0 < int(choice) <= len(available_moves):
+                break
+            print("You must input an integer that is the same as one of the " +
+                  "options")
+            choice = input("Enter your choice and then press Enter: ")
+            print()
+
+        if choice == "quit":
+            earlyEnd = True
+            break
+
+        move_r, move_c = available_moves[int(choice)]
+
+        if not game.legal_move((move_r, move_c)):
+            print("Not a legal move, please try again")
+            continue
+
+        game.apply_move((move_r, move_c))
 
         for x, row in enumerate(game.grid):
             for y, cell in enumerate(row):
@@ -94,9 +136,13 @@ if 6 <= board_size <= 20:
         board_str = "\n".join(board_row)
         print(board_str)
 
-        break
+    if earlyEnd:
+        print("Game Ended early")
+    else:
+        winners = game.outcome
+        for person in winners:
+            print(f"Congrats for Player {person} for a nice victory")
 
-    print("Game Over, Good Job")
 
 else:
     print("Invalid board size, please try again")
