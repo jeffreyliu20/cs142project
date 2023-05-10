@@ -281,10 +281,12 @@ class ReversiMock(ReversiBase):
         self.first_two = True
 
         if othello:
-            self._board.add_piece(2, (side // 2 - 1, side // 2 - 1))
-            self._board.add_piece(2, (side // 2, side // 2))
+            self._board.add_piece(1, (side // 2 - 1, side // 2 - 1))
+            self._board.add_piece(1, (side // 2, side // 2))
             self._board.add_piece(1, (side // 2, side // 2 - 1))
             self._board.add_piece(1, (side // 2 - 1, side // 2))
+            self._board.update_piece((side // 2 - 1, side // 2 - 1), 2)
+            self._board.update_piece((side // 2, side // 2), 2)
             self.first_two = False
 
     @property
