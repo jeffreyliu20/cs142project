@@ -83,7 +83,6 @@ if 6 <= board_size <= 20:
     board_str = "\n".join(board_row)
     print(board_str)
 
-    victor = -1
     earlyEnd = False
 
     while not game.done:
@@ -116,7 +115,7 @@ if 6 <= board_size <= 20:
             earlyEnd = True
             break
 
-        move_r, move_c = available_moves[int(choice)]
+        move_r, move_c = available_moves[int(choice)-1]
 
         if not game.legal_move((move_r, move_c)):
             print("Not a legal move, please try again")
