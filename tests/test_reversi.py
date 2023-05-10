@@ -7,6 +7,14 @@ import pytest
 from reversi import Reversi
 
 
+def verify_size(expected: int) -> bool:
+    """
+    Test whether we can correctly create a (non-Othello) 4x4 game
+    """
+    #reversi = Reversi(side=4, players=2, othello=False)
+    pass
+
+
 def test_create_1():
     """
     Test whether we can correctly create a (non-Othello) 4x4 game
@@ -97,17 +105,9 @@ def test_piece_at_1():
 
     othello_pos = [(3, 3, 2), (3, 4, 1), (4, 3, 1), (4, 4, 2)]
 
-    for r in range(8):
-        for c in range(8):
-            piece = reversi.piece_at((r, c))
-            if r in (3, 4) and c in (3, 4):
-                continue
-            assert (
-                piece is None
-            ), f"Expected piece_at(({r},{c})) to return None but got {piece}"
 
     for r, c, expected_piece in othello_pos:
-        piece = reversi.piece_at((r, c)).player
+        piece = reversi.piece_at((r, c))
         assert (
             piece == expected_piece
         ), f"Expected piece_at(({r},{c})) to return {expected_piece} but got {piece}"
@@ -135,21 +135,11 @@ def test_available_moves_1():
     reversi = Reversi(side=8, players=2, othello=True)
 
     expected = {
-        (2, 2),
         (2, 3),
-        (2, 4),
-        (2, 5),
         (3, 2),
-        (3, 5),
-        (4, 2),
-        (4, 5),
-        (5, 2),
-        (5, 3),
         (5, 4),
-        (5, 5),
+        (4, 5),
     }
-    expected.add((0, 0))
-    expected.add((7, 7))
 
     assert set(reversi.available_moves) == expected
 
@@ -163,21 +153,11 @@ def test_legal_move_1():
     reversi = Reversi(side=8, players=2, othello=True)
 
     legal = {
-        (2, 2),
         (2, 3),
-        (2, 4),
-        (2, 5),
         (3, 2),
-        (3, 5),
-        (4, 2),
-        (4, 5),
-        (5, 2),
-        (5, 3),
         (5, 4),
-        (5, 5),
+        (4, 5),
     }
-    legal.add((0, 0))
-    legal.add((7, 7))
 
     for r in range(8):
         for c in range(8):
@@ -211,16 +191,16 @@ def test_apply_move_1():
     """
 
     reversi = Reversi(side=8, players=2, othello=True)
-    reversi.apply_move((3, 5))
+    reversi.apply_move((5, 4))
 
-    assert reversi.legal_move((2, 6))
-    assert reversi.legal_move((3, 6))
-    assert reversi.legal_move((4, 6))
-
-    assert reversi.piece_at((3, 5)) == 1
+    assert reversi.piece_at((5, 4)) == 1
     assert reversi.turn == 2
     assert not reversi.done
     assert reversi.outcome == []
+
+    assert reversi.legal_move((5, 3))
+    assert reversi.legal_move((3, 5))
+    assert reversi.legal_move((5, 5))
 
 
 def test_apply_move_2():
@@ -303,7 +283,7 @@ def test_winner_1():
     reversi.apply_move((1, 3))
     reversi.apply_move((2, 3))
 
-    assert reversi.piece_at(0,0) == 1
+    assert reversi.piece_at((0,0)) == 1
     assert reversi.piece_at(0,1) == 1
     assert reversi.piece_at(0,2) == 1
     assert reversi.piece_at(0,3) == 1

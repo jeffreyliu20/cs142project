@@ -634,7 +634,7 @@ class Reversi(ReversiBase):
         return the number of the player (players are numbered
         from 1). Otherwise, return None.
         """
-        return self._board.get_piece(pos)
+        return self._board.get_piece(pos).player
 
     def legal_move(self, pos: Tuple[int, int]) -> bool:
         """
