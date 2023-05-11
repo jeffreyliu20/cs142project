@@ -541,3 +541,57 @@ def test_legal_move_8x8_non_othello():
                 assert not reversi.legal_move(
                     (r, c)
                 ), f"{(r,c)} is not a legal move, but legal_move returned True"
+
+
+def test_available_moves_8x8_non_othello_after2():
+    """
+    Test that available_moves returns correct values
+    in an 8x8 Reversi game with no moves made yet
+    """
+    reversi = Reversi(side=8, players=2, othello=False)
+
+    assert reversi.first_two
+    reversi.apply_move(3,4)
+    reversi.apply_move(3,3)
+    reversi.apply_move(4,3)
+    reversi.apply_move(4,4)
+    expected = {
+        (2, 3),
+        (3, 2),
+        (5, 4),
+        (4, 5),
+    }
+
+    assert set(reversi.available_moves) == expected
+
+def test_legal_move_8x8_non_othello_after2():
+    """
+    Test that legal_move returns correct values
+    in an 8x8 Reversi game with no moves made yet
+    """
+
+    reversi = Reversi(side=8, players=2, othello=False)
+
+
+    reversi.apply_move(3,4)
+    reversi.apply_move(3,3)
+    reversi.apply_move(4,3)
+    reversi.apply_move(4,4)
+
+    legal = {
+        (2, 3),
+        (3, 2),
+        (5, 4),
+        (4, 5),
+    }
+
+    for r in range(6):
+        for c in range(6):
+            if (r, c) in legal:
+                assert reversi.legal_move(
+                    (r, c)
+                ), f"{(r,c)} is a legal move, but legal_move returned False"
+            else:
+                assert not reversi.legal_move(
+                    (r, c)
+                ), f"{(r,c)} is not a legal move, but legal_move returned True"
