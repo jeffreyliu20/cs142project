@@ -212,12 +212,17 @@ def test_apply_move_2():
     reversi.apply_move((3, 5))
     reversi.apply_move((4, 5))
 
-    assert reversi.legal_move((2, 6))
-    assert reversi.legal_move((3, 6))
-    assert reversi.legal_move((4, 6))
+    assert reversi.legal_move((5, 2))
+    assert reversi.legal_move((5, 3))
+    assert reversi.legal_move((5, 4))
+    assert reversi.legal_move((5, 5))
     assert reversi.legal_move((5, 6))
 
+    assert reversi.piece_at((3, 3)) == 1
+    assert reversi.piece_at((3, 4)) == 1
     assert reversi.piece_at((3, 5)) == 1
+    assert reversi.piece_at((4, 3)) == 2
+    assert reversi.piece_at((4, 4)) == 2
     assert reversi.piece_at((4, 5)) == 2
     assert reversi.turn == 1
     assert not reversi.done
@@ -551,15 +556,15 @@ def test_available_moves_8x8_non_othello_after2():
     reversi = Reversi(side=8, players=2, othello=False)
 
     assert reversi.first_two
-    reversi.apply_move(3,4)
-    reversi.apply_move(3,3)
-    reversi.apply_move(4,3)
-    reversi.apply_move(4,4)
+    reversi.apply_move((3,3))
+    reversi.apply_move((3,4))
+    reversi.apply_move((4,4))
+    reversi.apply_move((4,3))
     expected = {
-        (2, 3),
-        (3, 2),
-        (5, 4),
-        (4, 5),
+        (2, 4),
+        (4, 2),
+        (5, 3),
+        (3, 5),
     }
 
     assert set(reversi.available_moves) == expected
@@ -573,16 +578,16 @@ def test_legal_move_8x8_non_othello_after2():
     reversi = Reversi(side=8, players=2, othello=False)
 
 
-    reversi.apply_move(3,4)
-    reversi.apply_move(3,3)
-    reversi.apply_move(4,3)
-    reversi.apply_move(4,4)
+    reversi.apply_move((3,3))
+    reversi.apply_move((3,4))
+    reversi.apply_move((4,4))
+    reversi.apply_move((4,3))
 
     legal = {
-        (2, 3),
-        (3, 2),
-        (5, 4),
-        (4, 5),
+        (2, 4),
+        (4, 2),
+        (5, 3),
+        (3, 5),
     }
 
     for r in range(6):
