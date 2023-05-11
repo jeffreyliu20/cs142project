@@ -685,11 +685,12 @@ class Reversi(ReversiBase):
 
         Returns: None
         """
+        move_dict = self.find_moves()
         if pos in self.available_moves:
             self._board.add_piece(self.turn, pos)
             for dir in DIRECTION_LIST:
-                if dir in self.find_moves():
-                    if pos in self.find_moves()[dir]:
+                if dir in move_dict:
+                    if pos in move_dict[dir]:
                         r, c = pos
                         y, x = dir
                         new_y = r + y
