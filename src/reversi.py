@@ -462,10 +462,16 @@ class Reversi(ReversiBase):
         """
         super().__init__(side, players, othello)
 
+        if players > 2 and othello:
+            raise ValueError("Othello is not allowed for more than 2 players.")
+        if players < 2 or players > 9:
+            raise ValueError("Player count must be 2-9.")
+        if side < 3:
+            raise ValueError("Side length must be greater than 3.")
         if side <= players:
             raise ValueError("Side length must be greater than number of players.")
-        if side % 2 == 1:
-            raise ValueError("Odd side lengths not permitted.")
+        if side % 2 != players % 2:
+            raise ValueError("Parity of players and side length must match.")
         
         self._board = Board(side)
         self._turn = 1
@@ -634,7 +640,7 @@ class Reversi(ReversiBase):
         return the number of the player (players are numbered
         from 1). Otherwise, return None.
         """
-        return self._board.get_piece(pos)
+        return self._board.get_piece(pos).player
 
     def legal_move(self, pos: Tuple[int, int]) -> bool:
         """
@@ -685,11 +691,12 @@ class Reversi(ReversiBase):
 
         Returns: None
         """
+        move_dict = self.find_moves()
         if pos in self.available_moves:
             self._board.add_piece(self.turn, pos)
             for dir in DIRECTION_LIST:
-                if dir in self.find_moves():
-                    if pos in self.find_moves()[dir]:
+                if dir in move_dict:
+                    if pos in move_dict[dir]:
                         r, c = pos
                         y, x = dir
                         new_y = r + y

@@ -281,10 +281,12 @@ class ReversiMock(ReversiBase):
         self.first_two = True
 
         if othello:
-            self._board.add_piece(2, (side // 2 - 1, side // 2 - 1))
-            self._board.add_piece(2, (side // 2, side // 2))
+            self._board.add_piece(1, (side // 2 - 1, side // 2 - 1))
+            self._board.add_piece(1, (side // 2, side // 2))
             self._board.add_piece(1, (side // 2, side // 2 - 1))
             self._board.add_piece(1, (side // 2 - 1, side // 2))
+            self._board.update_piece((side // 2 - 1, side // 2 - 1), 2)
+            self._board.update_piece((side // 2, side // 2), 2)
             self.first_two = False
 
     @property
@@ -337,7 +339,7 @@ class ReversiMock(ReversiBase):
             return []
         move_list = [(0, 0), (self.size - 1, self.size - 1)]
         for piece in self._board.pieces:
-            r, c = piece.pos
+            r, c = piece
             for x in range(-1, 2):
                 for y in range(-1, 2):
                     if not (self.grid[r + x][c + y] or 
