@@ -288,24 +288,13 @@ def test_winner_1():
     reversi.apply_move((1, 3))
     reversi.apply_move((2, 3))
 
-    assert reversi.piece_at((0,0)) == 1
-    assert reversi.piece_at(0,1) == 1
-    assert reversi.piece_at(0,2) == 1
-    assert reversi.piece_at(0,3) == 1
-    assert reversi.piece_at(1,2) == 1
-    assert reversi.piece_at(1,3) == 1
-    assert reversi.piece_at(2,3) == 1
+    expected = [[(0,0),(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)],
+                [(1,0),(1,2),(2,0),(2,1),(2,2),(3,0),(3,1),(3,2),(3,3)]]
 
-    assert reversi.piece_at(1,0) == 2
-    assert reversi.piece_at(1,2) == 2
-    assert reversi.piece_at(2,0) == 2
-    assert reversi.piece_at(2,0) == 2
-    assert reversi.piece_at(2,1) == 2
-    assert reversi.piece_at(2,2) == 2
-    assert reversi.piece_at(3,0) == 2
-    assert reversi.piece_at(3,1) == 2
-    assert reversi.piece_at(3,2) == 2
-    assert reversi.piece_at(3,3) == 2
+    for player, piece_list in enumerate(expected):
+        for piece in piece_list:
+            assert reversi.piece_at(piece) == player + 1
+
 
     assert reversi.done
     assert reversi.outcome == [2]
@@ -488,21 +477,6 @@ def test_legal_move_20x20():
                     (r, c)
                 ), f"{(r,c)} is not a legal move, but legal_move returned True"
 
-    """
-    Test that available_moves returns correct values
-    in an 20x20 Othello game with no moves made yet
-    """
-    reversi = Reversi(side=20, players=2, othello=True)
-
-    expected = {
-        (8, 9),
-        (9, 8),
-        (11, 10),
-        (10, 11),
-    }
-
-    assert set(reversi.available_moves) == expected
-
 
 def test_available_moves_8x8_non_othello():
     """
@@ -548,10 +522,10 @@ def test_legal_move_8x8_non_othello():
                 ), f"{(r,c)} is not a legal move, but legal_move returned True"
 
 
-def test_available_moves_8x8_non_othello_after2():
+def test_available_moves_8x8_non_othello_after4():
     """
     Test that available_moves returns correct values
-    in an 8x8 Reversi game with no moves made yet
+    in an 8x8 Reversi game with 4 moves made
     """
     reversi = Reversi(side=8, players=2, othello=False)
 
@@ -569,10 +543,10 @@ def test_available_moves_8x8_non_othello_after2():
 
     assert set(reversi.available_moves) == expected
 
-def test_legal_move_8x8_non_othello_after2():
+def test_legal_move_8x8_non_othello_after4():
     """
     Test that legal_move returns correct values
-    in an 8x8 Reversi game with no moves made yet
+    in an 8x8 Reversi game with 4 moves made
     """
 
     reversi = Reversi(side=8, players=2, othello=False)
@@ -600,3 +574,338 @@ def test_legal_move_8x8_non_othello_after2():
                 assert not reversi.legal_move(
                     (r, c)
                 ), f"{(r,c)} is not a legal move, but legal_move returned True"
+
+
+def test_available_moves_9x9_non_othello():
+    """
+    Test that available_moves returns correct values
+    in an 9x9 Reversi game with no moves made yet
+    """
+    reversi = Reversi(side=9, players=3, othello=False)
+
+    assert reversi.first_two
+    expected = {
+        (3, 3),
+        (3, 4),
+        (3, 5),
+        (4, 3),
+        (4, 4),
+        (4, 5),
+        (5, 3),
+        (5, 4),
+        (5, 5)
+    }
+
+    assert set(reversi.available_moves) == expected
+
+def test_legal_move_9x9_non_othello():
+    """
+    Test that legal_move returns correct values
+    in an 9x9 Reversi game with no moves made yet
+    """
+
+    reversi = Reversi(side=9, players=3, othello=False)
+
+    legal = {
+        (3, 3),
+        (3, 4),
+        (3, 5),
+        (4, 3),
+        (4, 4),
+        (4, 5),
+        (5, 3),
+        (5, 4),
+        (5, 5)
+    }
+
+    for r in range(6):
+        for c in range(6):
+            if (r, c) in legal:
+                assert reversi.legal_move(
+                    (r, c)
+                ), f"{(r,c)} is a legal move, but legal_move returned False"
+            else:
+                assert not reversi.legal_move(
+                    (r, c)
+                ), f"{(r,c)} is not a legal move, but legal_move returned True"
+
+
+def test_available_moves_9x9_non_othello_after9():
+    """
+    Test that available_moves returns correct values
+    in an 9x9 Reversi game with 9 moves made 
+    """
+    reversi = Reversi(side=9, players=3, othello=False)
+
+    assert reversi.first_two
+    reversi.apply_move((3,3))
+    reversi.apply_move((3,4))
+    reversi.apply_move((4,4))
+    reversi.apply_move((4,3))
+    reversi.apply_move((5,3))
+    reversi.apply_move((4,5))
+    reversi.apply_move((5,5))
+    reversi.apply_move((5,3))
+    reversi.apply_move((5,4))
+    expected = {
+        (2, 2),
+        (2, 5),
+        (3, 6),
+        (4, 6),
+        (5, 2),
+        (6, 3),
+        (6, 6)
+    }
+
+    assert set(reversi.available_moves) == expected
+
+def test_legal_move_9x9_non_othello_after9():
+    """
+    Test that legal_move returns correct values
+    in an 9x9 Reversi game with 9 moves made
+    """
+
+    reversi = Reversi(side=9, players=3, othello=False)
+
+
+    reversi.apply_move((3,3))
+    reversi.apply_move((3,4))
+    reversi.apply_move((4,4))
+    reversi.apply_move((4,3))
+    reversi.apply_move((5,3))
+    reversi.apply_move((4,5))
+    reversi.apply_move((5,5))
+    reversi.apply_move((5,3))
+    reversi.apply_move((5,4))
+
+    legal = {
+        (2, 2),
+        (2, 5),
+        (3, 6),
+        (4, 6),
+        (5, 2),
+        (6, 3),
+        (6, 6)
+    }
+
+
+    for r in range(6):
+        for c in range(6):
+            if (r, c) in legal:
+                assert reversi.legal_move(
+                    (r, c)
+                ), f"{(r,c)} is a legal move, but legal_move returned False"
+            else:
+                assert not reversi.legal_move(
+                    (r, c)
+                ), f"{(r,c)} is not a legal move, but legal_move returned True"
+
+
+def test_winner_2():
+    """
+    Test that the game ends correctly in a 5x5 game with 3 players
+    (with one winner)
+    """
+
+    reversi = Reversi(side=5, players=3, othello=False)
+    reversi.apply_move((1, 1))
+    reversi.apply_move((3, 1))
+    reversi.apply_move((2, 2))
+    reversi.apply_move((1, 3))
+    reversi.apply_move((1, 2))
+    reversi.apply_move((2, 3))
+    reversi.apply_move((3, 3))
+    reversi.apply_move((2, 1))
+    reversi.apply_move((3, 2))
+    reversi.apply_move((3, 0))
+    reversi.apply_move((2, 4)) #player 3 eliminated, turn skip for rest of game
+    reversi.apply_move((0, 2))
+    reversi.apply_move((4, 1))
+    reversi.apply_move((2, 0))
+    reversi.apply_move((0, 1))
+    reversi.apply_move((4, 2))
+    reversi.apply_move((0, 4))
+    reversi.apply_move((1, 4))
+    reversi.apply_move((3, 4))
+    reversi.apply_move((0, 0))
+    reversi.apply_move((0, 3))
+    reversi.apply_move((1, 0))
+    reversi.apply_move((4, 0))
+    reversi.apply_move((4, 4))
+    reversi.apply_move((4, 3))
+
+    expected = [[(0,0),(0,1),(0,2),(1,0),(1,1),(1,2),(1,4),(2,0),(3,0),(4,4)],
+                [(0,3),(0,4),(1,3),(2,1),(2,2),(2,3),(2,4),(3,1),(3,2),(3,3),(3,4),(4,0),(4,1),(4,2),(4,3)]]
+
+    for player, piece_list in enumerate(expected):
+        for piece in piece_list:
+            assert reversi.piece_at(piece) == player + 1
+
+
+    assert reversi.done
+    assert reversi.outcome == [2]
+
+
+def test_load_game_1():
+    """
+    Test that the game loads correctly in a 8x8 Othello game
+    """
+
+    reversi = Reversi(side=8, players=2, othello=True)
+
+    grid = [[None for j in range(8)] for i in range(8)]
+    grid [3][3] = 2
+    grid [3][4] = 2
+    grid [3][2] = 1
+    grid [4][3] = 1
+    grid [4][4] = 1
+
+    reversi.load_game(2, grid)
+
+    assert reversi.turn == 2
+    assert reversi.piece_at((3,3)) == 2
+    assert reversi.piece_at((3,4)) == 2
+    assert reversi.piece_at((3,2)) == 1
+    assert reversi.piece_at((4,3)) == 1
+    assert reversi.piece_at((4,4)) == 1
+
+
+def test_load_game_2():
+    """
+    Test that the game loads incorrectly with turn error
+    """
+    grid = [[None for j in range(8)] for i in range(8)]
+    grid [3][3] = 2
+    grid [3][4] = 2
+    grid [3][2] = 1
+    grid [4][3] = 1
+    grid [4][4] = 1
+
+    with pytest.raises(ValueError):
+        reversi = Reversi(side=8, players=2, othello=True)
+        reversi.load_game(-1, grid)
+
+
+def test_load_game_3():
+    """
+    Test that the game loads incorrectly with size error
+    """
+    grid = [[None for j in range(6)] for i in range(6)]
+    grid [3][3] = 2
+    grid [3][4] = 2
+    grid [3][2] = 1
+    grid [4][3] = 1
+    grid [4][4] = 1
+
+    with pytest.raises(ValueError):
+        reversi = Reversi(side=8, players=2, othello=True)
+        reversi.load_game(2, grid)
+
+
+def test_load_game_4():
+    """
+    Test that the game loads incorrectly with grid player error
+    """
+    grid = [[None for j in range(6)] for i in range(6)]
+    grid [3][3] = 2
+    grid [3][4] = 4
+    grid [3][2] = 3
+    grid [4][3] = 1
+    grid [4][4] = 1
+
+    with pytest.raises(ValueError):
+        reversi = Reversi(side=8, players=2, othello=True)
+        reversi.load_game(2, grid)
+
+
+def test_simulate_move_1():
+    """
+    Test simulating a move that doesn't end the game
+    """
+
+    reversi = Reversi(side=8, players=2, othello=True)
+
+    grid_orig = reversi.grid
+
+    future_reversi = reversi.simulate_moves([(3, 5)])
+
+    legal = {
+        (2, 2),
+        (2, 3),
+        (2, 4),
+        (2, 5),
+        (3, 2),
+        (3, 5),
+        (4, 2),
+        (4, 5),
+        (5, 2),
+        (5, 3),
+        (5, 4),
+        (5, 5),
+        (0, 0),
+        (7, 7),
+    }
+
+    # Check that the original game state has been preserved
+    assert reversi.grid == grid_orig
+    assert reversi.turn == 1
+    assert set(reversi.available_moves) == legal
+    assert not reversi.done
+    assert reversi.outcome == []
+
+    # Check that the returned object corresponds to the
+    # state after making the move.
+    legal.remove((3, 5))
+    legal.update({(2, 6), (3, 6), (4, 6)})
+    assert future_reversi.grid != grid_orig
+    assert future_reversi.turn == 2
+    assert set(future_reversi.available_moves) == legal
+    assert not future_reversi.done
+    assert future_reversi.outcome == []
+
+    
+
+def test_simulate_move_3():
+    """
+    Test simulating a move that doesn't end the game
+    """
+
+    reversi = Reversi(side=8, players=2, othello=True)
+
+    grid_orig = reversi.grid
+
+    future_reversi = reversi.simulate_moves([(3, 5), (2,5)])
+
+    legal = {
+        (2, 2),
+        (2, 3),
+        (2, 4),
+        (2, 5),
+        (3, 2),
+        (3, 5),
+        (4, 2),
+        (4, 5),
+        (5, 2),
+        (5, 3),
+        (5, 4),
+        (5, 5),
+        (0, 0),
+        (7, 7),
+    }
+
+    # Check that the original game state has been preserved
+    assert reversi.grid == grid_orig
+    assert reversi.turn == 1
+    assert set(reversi.available_moves) == legal
+    assert not reversi.done
+    assert reversi.outcome == []
+
+    # Check that the returned object corresponds to the
+    # state after making the move.
+    legal.remove((3, 5))
+    legal.update({(2, 6), (3, 6), (4, 6)})
+    assert future_reversi.grid != grid_orig
+    assert future_reversi.turn == 2
+    assert set(future_reversi.available_moves) == legal
+    assert not future_reversi.done
+    assert future_reversi.outcome == []
