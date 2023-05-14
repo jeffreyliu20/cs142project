@@ -568,7 +568,7 @@ class Reversi(ReversiBase):
             for r in range(self.size // 2 - 1, self.size // 2 + 1):
                 for c in range(self.size // 2 - 1, self.size // 2 + 1):
                     if not self.grid[r][c]:
-                        move_list[(r, c)] = ((r, c))
+                        move_list[(r, c)] = [(r, c)]
                         center_filled = False
             if center_filled:
                 self.first_two = False
