@@ -600,6 +600,12 @@ class Reversi(ReversiBase):
             for move in dir_moves:
                 if move not in move_list:
                     move_list.append(move)
+        if len(move_list) == 0:
+            print(f"Player {self.turn} has no available moves - skipping their turn")
+            if self._turn < self.num_players:
+                self._turn += 1
+            else:
+                self._turn = 1
         return move_list
 
 
