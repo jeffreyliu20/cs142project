@@ -565,8 +565,10 @@ class Reversi(ReversiBase):
         move_list = {}
         if self.first_two:
             center_filled = True
-            for r in range(self.size // 2 - 1, self.size // 2 + 1):
-                for c in range(self.size // 2 - 1, self.size // 2 + 1):
+            middle = self.size // 2
+            r_center = self.num_players // 2
+            for r in range(middle - r_center, middle + r_center):
+                for c in range(middle - r_center, middle + r_center):
                     if not self.grid[r][c]:
                         move_list[(r, c)] = [(r, c)]
                         center_filled = False
