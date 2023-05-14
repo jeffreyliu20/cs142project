@@ -103,9 +103,8 @@ def play_game(n, s, othello):
             print()
 
             for k, move in enumerate(available_moves):
-                print(move)
                 i, j = move
-                print(f"{k+1}) {i}, {j}")
+                print(f"{k+1}) ({i}, {j})")
             
             print()
             print("If you want to exit the game, type 'quit' and then press Enter")
