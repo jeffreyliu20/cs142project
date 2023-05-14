@@ -600,12 +600,6 @@ class Reversi(ReversiBase):
             for move in dir_moves:
                 if move not in move_list:
                     move_list.append(move)
-        if len(move_list) == 0:
-            print(f"Player {self.turn} has no available moves - skipping their turn")
-            if self._turn < self.num_players:
-                self._turn += 1
-            else:
-                self._turn = 1
         return move_list
 
 
@@ -726,6 +720,21 @@ class Reversi(ReversiBase):
                 self._turn += 1
             else:
                 self._turn = 1
+            if len(self.available_moves) == 0:
+                n = 0
+                while True:
+                    if n == self.num_players:
+                        self.end_game()
+                        break
+                    if self._turn < self.num_players:
+                        self._turn += 1
+                    else:
+                        self._turn = 1
+                    if len(self.available_moves) > 0:
+                        break
+                    else:
+                        n += 1
+
         else:
             print("Invalid move")
 
@@ -741,7 +750,7 @@ class Reversi(ReversiBase):
             final_dict[i] = 0
         for piece in self._board.pieces:
             final_dict[piece.player] += 1
-        self._outcome = max(final_dict, key = final_dict.get)
+        self._outcome = [max(final_dict, key = final_dict.get)]
         self._done = True
         
         self._turn = 1

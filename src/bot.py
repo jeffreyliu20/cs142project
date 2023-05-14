@@ -4,7 +4,7 @@ recording the results.
 Currently only functional for the ReversiStub class.
 """
 import sys
-from reversi import ReversiBase
+from reversi import ReversiBase, Reversi
 from mocks import ReversiStub, ReversiBotMock
 from typing import Tuple
 import random
@@ -49,14 +49,15 @@ def play_game() -> str:
     
     Returns [str]: "Player X wins" where x is the winning player or "Tie"
     """
-    game = ReversiBotMock(side=8, players=2, othello=False)
+    game = Reversi(side=8, players=2, othello=False)
 
     while not game.done:
-        if game.turn == 1:
-            move = choose_random_move(game)
-        elif game.turn == 2:
-            move = choose_high_n_move(game)
-        game.apply_move(move)
+        if len(game.available_moves) > 0:
+            if game.turn == 1:
+                move = choose_random_move(game)
+            elif game.turn == 2:
+                move = choose_high_n_move(game)
+            game.apply_move(move)
 
     if len(game.outcome) > 1:
         return "Tie"
