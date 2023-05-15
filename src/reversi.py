@@ -736,10 +736,10 @@ class Reversi(ReversiBase):
         for player in final_dict:
             if final_dict[player] > highest_pieces:
                 self._outcome = [player]
-            if final_dict[player] == highest_pieces:
+                highest_pieces = final_dict[player]
+            elif final_dict[player] == highest_pieces:
                 self._outcome.append(player)
         self._done = True
-        
         self._turn = 1
 
     def load_game(self, turn: int, grid: BoardGridType) -> None:

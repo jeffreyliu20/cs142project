@@ -7,6 +7,7 @@ import sys
 from reversi import ReversiBase, Reversi
 from typing import Tuple
 import random
+import click
 
 def choose_random_move(revers: ReversiBase) -> Tuple[int, int]:
     """
@@ -39,7 +40,7 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
     return max(move_n, key= lambda x: move_n[x])
 
 
-def play_game() -> str:
+def play_game(player1, player2) -> str:
     """
     Simulates a game of Reversi between two bots
     
@@ -51,9 +52,15 @@ def play_game() -> str:
 
     while not game.done:
         if game.turn == 1:
-            move = choose_random_move(game)
+            if player1 == "random":
+                move = choose_random_move(game)
+            if player1 == "smart":
+                move = choose_high_n_move(game)
         elif game.turn == 2:
-            move = choose_high_n_move(game)
+            if player2 == "random":
+                move = choose_random_move(game)
+            if player2 == "smart":
+                move = choose_high_n_move(game)
         game.apply_move(move)
 
     if len(game.outcome) > 1:
@@ -63,17 +70,27 @@ def play_game() -> str:
 
 
 
+@click.command("banner")
+@click.option("-n", "--num_games", default="100")
+@click.option("-1", "--player1", 
+              type=click.Choice(["random", "smart", "very-smart"]), 
+              default="random")
+@click.option("-2", "--player2", 
+              type=click.Choice(["random", "smart", "very-smart"]), 
+              default="random")
 
-if len(sys.argv) != 2:
-    raise ValueError("bot.py only accepts one input (number of games)")
-NUM_GAMES = int(sys.argv[1])
-games_played = 0
-results = {"Player 1 wins": 0, "Player 2 wins": 0, "Tie": 0}
+def cmd(num_games, player1, player2):
+    NUM_GAMES = int(num_games)
+    games_played = 0
+    results = {"Player 1 wins": 0, "Player 2 wins": 0, "Tie": 0}
 
-while games_played < NUM_GAMES:
-    results[play_game()] += 1
-    games_played += 1
+    while games_played < NUM_GAMES:
+        results[play_game(player1, player2)] += 1
+        games_played += 1
 
-for key, value in results.items():
-    percentage = value / NUM_GAMES * 100
-    print(f"{key}: {percentage}%")
+    for key, value in results.items():
+        percentage = value / NUM_GAMES * 100
+        print(f"{key}: {percentage}%")
+
+if __name__ == "__main__":
+    cmd()
