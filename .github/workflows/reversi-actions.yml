@@ -1,14 +1,29 @@
-name: reversi-actions
+name: Run Tests
+
 on: [push]
+
 jobs:
-    check_files:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v3
-          - uses: actions/setup-python@v4
-            with:
-              python-version: 3.10
-          - run: pip3 install -r requirements.txt
-          - run: mypy src/* tests/*
-          - run: pytest tests/*
+  run-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
+
+      - name: Run mypy
+        run: mypy src/* tests/*
+
+      - name: Run tests
+        run: pytest -v
             
