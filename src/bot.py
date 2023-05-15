@@ -39,6 +39,30 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
         move_n[move] = n
     return max(move_n, key= lambda x: move_n[x])
 
+def choose_high_m_move(revers: ReversiBase) -> Tuple[int, int]:
+    """
+    Chooses the move that will take the most pieces and retain them 
+    after the next turn in a Reversi game
+    
+    Parameters:
+        revers[ReversiBase]: a reversi game
+        
+    Returns[Tuple[int, int]]: coordinates corresponding to a move
+    """
+    move_m = {}
+    for move in revers.available_moves:
+        m = 0
+        simulated_game = revers.simulate_moves([move])
+        possible_m_list = []
+        for mov in simulated_game.available_moves:
+            game_2 = simulated_game.simulate_moves([mov])
+            for piece in game_2.pieces:
+                if piece.player == revers.turn:
+                    m += 1
+            possible_m_list.append(m)
+        move_m[move] = sum(possible_m_list) / len(possible_m_list)
+    return max(move_m, key= lambda x: move_m[x])
+
 
 def play_game(player1, player2) -> str:
     """
