@@ -503,7 +503,8 @@ class Reversi(ReversiBase):
         return self._turn
 
     def move_works(self, piece: "Piece", 
-                    dir: Tuple[int, int]) -> Optional[Tuple[int, int]]:
+                    dir: Tuple[int, int],
+                    rec: int=1) -> Optional[Tuple[int, int]]:
         """
         Returns the coordinate of a move if there is one a certain direction
         adjacent to a certain piece
@@ -511,6 +512,7 @@ class Reversi(ReversiBase):
         Parameters:
             piece[Piece]: a piece on the board
             dir[Tuple[int, int]]: coordinates indicating a direction
+            rec[int]: number of pieces that the function has checked
             
         Returns: coordinates if the move works, None if not
         """
@@ -519,13 +521,14 @@ class Reversi(ReversiBase):
         y, x = dir
         if (0 <= r - y < self.size and
              0 <= c - x < self.size and 0 <= r + y < self.size and 
-             0 <= c + x < self.size) and ((self.grid[r + y][c + x] and not
-                                           self.grid[r][c] == self.turn) 
-                                           and not self.grid[r - y][c - x]):
+             0 <= c + x < self.size) and (self.grid[r + y][c + x] and not 
+                                          self.grid[r][c] == self.turn and 
+                                          (rec > 1 or not 
+                                           self.grid[r - y][c - x])):
             if self.grid[r + y][c + x] == self.turn:
-                return(r - y, c - x)
+                return (r - rec * y, c - rec * x)
             else:
-                return self.move_works(piece.adjacent[dir], dir)
+                return self.move_works(piece.adjacent[dir], dir, rec + 1)
         else:
             return None
         
