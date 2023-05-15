@@ -34,12 +34,10 @@ class Board:
 
     _grid: BoardGridType
     _pieces: dict[Tuple[int, int], "Piece"]
-    _edgepieces: List["Piece"]
 
     def __init__(self, side: int):
         self._grid = [[None]*side for _ in range(side)]
         self._pieces = {}
-        self._edgepieces = []
 
 
     @property
@@ -72,31 +70,6 @@ class Board:
         """
         return list(self._pieces.values())
     
-    @property
-    def edge_pieces(self) -> List["Piece"]:
-        """
-        Returns a list of the pieces on a board that are not completely
-        surrounded by other pieces
-        
-        Parameters: none beyond self
-        Returns[List[Piece]]: a list of pieces on the edge of the board
-        """
-        self.update_edge_pieces()
-        return self._edgepieces
-    
-
-    def update_edge_pieces(self) -> None:
-        """
-        Removes pieces that are not on the edge from the list of edge pieces
-        
-        Parameters: none beyond self
-        Returns: None
-        """
-        final_list = self._edgepieces
-        for piece in self._edgepieces:
-            if len(piece.adjacent) == 8:
-                final_list.remove(piece)
-        self._edgepieces = final_list
     
     def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
         """
@@ -117,7 +90,6 @@ class Board:
                 
         self._grid[r][c] = player
         self._pieces[(r, c)] = new_piece
-        self._edgepieces.append(new_piece)
 
     def update_piece(self, pos: Tuple[int, int], player: int):
         """
@@ -510,6 +482,13 @@ class Reversi(ReversiBase):
         numbered from 1.
         """
         return self._board.grid
+    
+    @property
+    def pieces(self) -> List["Piece"]:
+        """
+        Returns a list of pieces on the board
+        """
+        return self._board.pieces
 
     @property
     def turn(self) -> int:
@@ -575,7 +554,7 @@ class Reversi(ReversiBase):
             if center_filled:
                 self.first_two = False
         if not self.first_two:
-            for piece in self._board.edge_pieces:
+            for piece in self.pieces:
                 for dir in DIRECTION_LIST:
                     if self.move_works(piece, dir):
                         r, c = piece.pos
@@ -746,11 +725,16 @@ class Reversi(ReversiBase):
         Returns: nothing
         """
         final_dict = {}
+        highest_pieces = 0
         for i in range(1, self.num_players + 1):
             final_dict[i] = 0
-        for piece in self._board.pieces:
+        for piece in self.pieces:
             final_dict[piece.player] += 1
-        self._outcome = [max(final_dict, key = final_dict.get)]
+        for player in final_dict:
+            if final_dict[player] > highest_pieces:
+                self._outcome = [player]
+            if final_dict[player] == highest_pieces:
+                self._outcome.append(player)
         self._done = True
         
         self._turn = 1

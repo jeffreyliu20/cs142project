@@ -5,7 +5,6 @@ Currently only functional for the ReversiStub class.
 """
 import sys
 from reversi import ReversiBase, Reversi
-from mocks import ReversiStub, ReversiBotMock
 from typing import Tuple
 import random
 
@@ -33,10 +32,9 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
     for move in revers.available_moves:
         n = 0
         simulated_game = revers.simulate_moves([move])
-        for row in simulated_game.grid:
-            for piece in row:
-                if piece == revers.turn:
-                    n += 1
+        for piece in simulated_game.pieces:
+            if piece.player == revers.turn:
+                n += 1
         move_n[move] = n
     return max(move_n, key= lambda x: move_n[x])
 
@@ -52,12 +50,11 @@ def play_game() -> str:
     game = Reversi(side=8, players=2, othello=False)
 
     while not game.done:
-        if len(game.available_moves) > 0:
-            if game.turn == 1:
-                move = choose_random_move(game)
-            elif game.turn == 2:
-                move = choose_high_n_move(game)
-            game.apply_move(move)
+        if game.turn == 1:
+            move = choose_random_move(game)
+        elif game.turn == 2:
+            move = choose_high_n_move(game)
+        game.apply_move(move)
 
     if len(game.outcome) > 1:
         return "Tie"
