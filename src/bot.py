@@ -50,6 +50,7 @@ def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
     move_m = {}
+
     for move in revers.available_moves:
         simulated_game = revers.simulate_moves([move])
         possible_m_list = []
@@ -64,6 +65,9 @@ def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
             move_m[move] = sum(possible_m_list) / len(possible_m_list)
         else:
             move_m[move] = 64
+    if len(move_m.keys()) == 0:
+        print(revers.available_moves)
+        print(revers.grid)
     return max(move_m, key= lambda x: move_m[x])
 
 
@@ -78,6 +82,16 @@ def play_game(player1, player2) -> str:
     game = Reversi(side=8, players=2, othello=False)
 
     while not game.done:
+        n = 0
+        while True:
+            if n == game.num_players:
+                game.end_game()
+            if len(game.available_moves) == 0:
+                game.skip_turn()
+                n += 1
+            else:
+                break
+
         if game.turn == 1:
             if player1 == "random":
                 move = choose_random_move(game)

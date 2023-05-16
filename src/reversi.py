@@ -524,7 +524,10 @@ class Reversi(ReversiBase):
         y, x = dir
         if (0 <= r - y < self.size and
              0 <= c - x < self.size and 0 <= r + y < self.size and 
-             0 <= c + x < self.size) and self.grid[r + y][c + x]:
+             0 <= c + x < self.size) and (self.grid[r][c] != self.turn and 
+                                          self.grid[r + y][c + x] 
+                                          and (not self.grid[r - y][c - x] 
+                                               or rec > 1)):
             if self.grid[r + y][c + x] == self.turn:
                 return (r - rec * y, c - rec * x)
             else:
@@ -643,7 +646,18 @@ class Reversi(ReversiBase):
         method) could place a piece in the specified position,
         return True. Otherwise, return False.
         """
-        return pos in self.available_moves
+        if self.first_two:
+            return pos in self.available_moves
+        else:
+            r, c = pos
+            for dir in DIRECTION_LIST:
+                y, x = dir
+                new_pos = (r + y, c + x)
+                if (0 <= r + y < self.size and 
+                    0 <= c + x < self.size) and self.grid[r + y][c + x]:
+                    if self.move_works(self._board.get_piece(new_pos), dir):
+                        return True
+            return False
 
     def apply_move(self, pos: Tuple[int, int]) -> None:
         """
@@ -678,7 +692,7 @@ class Reversi(ReversiBase):
         Returns: None
         """
         move_dict = self.find_moves()
-        if pos in self.available_moves:
+        if self.legal_move(pos):
             self._board.add_piece(self.turn, pos)
             for dir in DIRECTION_LIST:
                 if dir in move_dict:
@@ -697,30 +711,27 @@ class Reversi(ReversiBase):
                                 new_x += x
                             else:
                                 break
-
-            if len(self._board.pieces) == self.size ** 2:
+            if not self.first_two and len(np.unique(self.grid)) in [1, 2]:
                 self.end_game()
             if self._turn < self.num_players:
                 self._turn += 1
             else:
                 self._turn = 1
-            if len(self.available_moves) == 0:
-                n = 0
-                while True:
-                    if n == self.num_players:
-                        self.end_game()
-                        break
-                    if self._turn < self.num_players:
-                        self._turn += 1
-                    else:
-                        self._turn = 1
-                    if len(self.available_moves) > 0:
-                        break
-                    else:
-                        n += 1
 
         else:
             print("Invalid move")
+
+    def skip_turn(self) -> None:
+        """
+        skips a turn
+        Parameters: None
+        
+        Returns: nothing
+        """
+        if self._turn < self.num_players:
+            self._turn += 1
+        else:
+            self._turn = 1
 
     def end_game(self) -> None:
         """
