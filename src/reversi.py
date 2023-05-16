@@ -7,8 +7,9 @@ a Reversi class that inherits from this base class.
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional
 from copy import deepcopy
+import numpy as np
 
-BoardGridType = List[List[Optional[int]]]
+BoardGridType = np.array(int)
 """
 Type for representing the state of the game board (the "grid")
 as a list of lists. Each entry will either be an integer (meaning
@@ -36,7 +37,7 @@ class Board:
     _pieces: dict[Tuple[int, int], "Piece"]
 
     def __init__(self, side: int):
-        self._grid = [[None]*side for _ in range(side)]
+        self._grid = np.zeros((side, side), dtype=np.int_)
         self._pieces = {}
 
 
