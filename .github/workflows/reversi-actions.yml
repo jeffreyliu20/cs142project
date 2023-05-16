@@ -35,4 +35,4 @@ jobs:
           run: pip3 install -r requirements.txt
   
         - name: Run mypy
-          run: mypy src/* tests/*
+          run: mypy src/reversi.py src/bot.py src/tui.py src/gui.py tests/*
