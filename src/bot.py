@@ -4,28 +4,28 @@ recording the results.
 Currently only functional for the ReversiStub class.
 """
 import sys
-from reversi import ReversiBase, Reversi
+from reversi import Reversi
 from typing import Tuple
 import random
 import click
 
-def choose_random_move(revers: ReversiBase) -> Tuple[int, int]:
+def choose_random_move(revers: Reversi) -> Tuple[int, int]:
     """
     Chooses a move at random from available moves in a Reversi game
 
     Parameters:
-      revers[ReversiBase]: a reversi Game
+      revers[Reversi]: a reversi Game
     
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
     return random.choice(revers.available_moves)
 
-def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
+def choose_high_n_move(revers: Reversi) -> Tuple[int, int]:
     """
     Chooses the move that will take the most pieces in a Reversi game
     
     Parameters:
-        revers[ReversiBase]: a reversi game
+        revers[Reversi]: a reversi game
         
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
@@ -39,28 +39,31 @@ def choose_high_n_move(revers: ReversiBase) -> Tuple[int, int]:
         move_n[move] = n
     return max(move_n, key= lambda x: move_n[x])
 
-def choose_high_m_move(revers: ReversiBase) -> Tuple[int, int]:
+def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
     """
     Chooses the move that will take the most pieces and retain them 
     after the next turn in a Reversi game
     
     Parameters:
-        revers[ReversiBase]: a reversi game
+        revers[Reversi]: a reversi game
         
     Returns[Tuple[int, int]]: coordinates corresponding to a move
     """
     move_m = {}
     for move in revers.available_moves:
-        m = 0
         simulated_game = revers.simulate_moves([move])
         possible_m_list = []
         for mov in simulated_game.available_moves:
+            m = 0
             game_2 = simulated_game.simulate_moves([mov])
             for piece in game_2.pieces:
                 if piece.player == revers.turn:
                     m += 1
             possible_m_list.append(m)
-        move_m[move] = sum(possible_m_list) / len(possible_m_list)
+        if len(possible_m_list) > 0:
+            move_m[move] = sum(possible_m_list) / len(possible_m_list)
+        else:
+            move_m[move] = 64
     return max(move_m, key= lambda x: move_m[x])
 
 
@@ -80,11 +83,15 @@ def play_game(player1, player2) -> str:
                 move = choose_random_move(game)
             if player1 == "smart":
                 move = choose_high_n_move(game)
+            if player1 == "very-smart":
+                move = choose_high_m_move(game)
         elif game.turn == 2:
             if player2 == "random":
                 move = choose_random_move(game)
             if player2 == "smart":
                 move = choose_high_n_move(game)
+            if player2 == "very-smart":
+                move = choose_high_m_move(game)
         game.apply_move(move)
 
     if len(game.outcome) > 1:

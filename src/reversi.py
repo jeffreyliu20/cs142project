@@ -102,14 +102,14 @@ class Board:
         else:
             print("No piece at that position")
 
-    def get_piece(self, pos: Tuple[int, int]) -> Optional["Piece"]:
+    def get_piece(self, pos: Tuple[int, int]) -> "Piece":
         """
         Finds the piece at a specified point in the board
         Parameters:
             pos[Tuple[int]]: coordinates within the grid
-        Returns: a piece if there is one at the coordinates, None if not
+        Returns: piece at the coordinates
         """
-        return self._pieces.get(pos)
+        return self._pieces[pos]
     
     def update_grid(self, grid: BoardGridType) -> None:
         """
@@ -418,6 +418,8 @@ class ReversiBase(ABC):
 
 
 class Reversi(ReversiBase):
+
+    _outcome: List[int]
 
     def __init__(self, side: int, players: int, othello: bool):
         """
@@ -784,7 +786,7 @@ class Reversi(ReversiBase):
 
     def simulate_moves(self,
                        moves: ListMovesType
-                       ) -> "ReversiBase":
+                       ) -> "Reversi":
         """
         Simulates the effect of making a sequence of moves,
         **without** altering the state of the game (instead,
