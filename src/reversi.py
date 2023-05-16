@@ -34,11 +34,11 @@ class Board:
     """
 
     _grid: BoardGridType
-    _pieces: dict[Tuple[int, int], "Piece"]
+    _pieces: List[List[Optional["Piece"]]]
 
     def __init__(self, side: int):
         self._grid = np.zeros((side, side), dtype=np.int_)
-        self._pieces = {}
+        self._pieces = [[None]*side for _ in range(side)]
 
 
     @property
@@ -50,6 +50,16 @@ class Board:
         Returns[BoardGridType]: a grid
         """
         return self._grid
+    
+    @property
+    def piece_grid(self) -> List[List[Optional["Piece"]]]:
+        """
+        Returns a copy of the board's piece grid
+        
+        Parameters: none beyond self
+        Returns[List[List[Optional[Piece]]]]: a grid of pieces
+        """
+        return self._pieces
     
     @property
     def size(self) -> int:
@@ -69,7 +79,10 @@ class Board:
         Parameters: none beyond self
         Returns[List[Piece]]: a list of the pieces in the board
         """
-        return list(self._pieces.values())
+        final_list = []
+        for row in self._pieces:
+            final_list += row
+        return list(filter(lambda x: x is not None, final_list))
     
     
     def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
@@ -82,15 +95,9 @@ class Board:
         """
         r, c = pos
         new_piece = Piece(player, pos)
-        for direction in DIRECTION_LIST:
-            y, x = direction
-            if (0 <= r + y < self.size 
-                and 0 <= c + x < self.size) and self._grid[r + y][c + x]:
-                new_piece.adjacent[(y, x)] = self.get_piece((r + y, c + x))
-                self.get_piece((r + y, c + x)).adjacent[(-y, -x)] = new_piece
                 
         self._grid[r][c] = player
-        self._pieces[(r, c)] = new_piece
+        self._pieces[r][c] = new_piece
 
     def update_piece(self, pos: Tuple[int, int], player: int):
         """
@@ -99,7 +106,7 @@ class Board:
         r, c = pos
         if self._grid[r][c]:
             self._grid[r][c] = player
-            self._pieces[(r, c)].update_player(player)
+            self._pieces[r][c].update_player(player)
         else:
             print("No piece at that position")
 
@@ -110,7 +117,8 @@ class Board:
             pos[Tuple[int]]: coordinates within the grid
         Returns: piece at the coordinates
         """
-        return self._pieces[pos]
+        r, c = pos
+        return self._pieces[r][c]
     
     def update_grid(self, grid: BoardGridType) -> None:
         """
@@ -122,11 +130,11 @@ class Board:
         if len(grid) != len(self._grid):
             raise ValueError("Cannot change board size")
         
-        self._pieces = {}
+        self._pieces = [[None]*self.size for _ in range(self.size)]
         for r, row in enumerate(grid):
             for c, square in enumerate(row):
                 if square:
-                    self._pieces[(r, c)] = Piece(square, (r, c))
+                    self._pieces[r][c] = Piece(square, (r, c))
         self._grid = grid
         
 
@@ -137,12 +145,10 @@ class Piece:
 
     _player: int
     _pos: Tuple[int, int]
-    adjacent: dict[Tuple[int, int], "Piece"]
 
     def __init__(self, player: int, pos: Tuple[int, int]):
         self._player = player
         self._pos = pos
-        self.adjacent = {}
 
     @property
     def player(self) -> int:
@@ -531,7 +537,8 @@ class Reversi(ReversiBase):
             if self.grid[r + y][c + x] == self.turn:
                 return (r - rec * y, c - rec * x)
             else:
-                return self.move_works(piece.adjacent[dir], dir, rec + 1)
+                return self.move_works(self._board.piece_grid[r + y][c + x], 
+                                       dir, rec + 1)
         else:
             return None
         
@@ -559,18 +566,19 @@ class Reversi(ReversiBase):
                         center_filled = False
             if center_filled:
                 self.first_two = False
+                move_list = {}
         if not self.first_two:
             for piece in self.pieces:
                 if piece.player != self.turn:
                     for dir in DIRECTION_LIST:
+                        r, c = piece.pos
                         y, x = dir
-                        if ((-y, -x) not in piece.adjacent 
-                            and self.move_works(piece, dir)):
-                                r, c = piece.pos
-                                if dir in move_list:
-                                    move_list[dir].append((r - y, c - x))
-                                else:
-                                    move_list[dir] = [(r - y, c - x)]
+                        if (self.move_works(piece, dir) and 
+                            not self.grid[r - y][c - x]):
+                            if dir in move_list:
+                                move_list[dir].append((r - y, c - x))
+                            else:
+                                move_list[dir] = [(r - y, c - x)]
         return move_list
     
     @property
