@@ -8,6 +8,7 @@ from reversi import Reversi
 from typing import Tuple
 import random
 import click
+import numpy as np
 
 def choose_random_move(revers: Reversi) -> Tuple[int, int]:
     """
@@ -31,12 +32,11 @@ def choose_high_n_move(revers: Reversi) -> Tuple[int, int]:
     """
     move_n = {}
     for move in revers.available_moves:
-        n = 0
         simulated_game = revers.simulate_moves([move])
-        for piece in simulated_game.pieces:
-            if piece.player == revers.turn:
-                n += 1
-        move_n[move] = n
+        vals, counts = np.unique(simulated_game.grid, return_counts=True)
+        for i, val in enumerate(vals):
+            if val == revers.turn:
+                move_n[move] = counts[i]
     return max(move_n, key= lambda x: move_n[x])
 
 def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
@@ -56,10 +56,10 @@ def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
         for mov in simulated_game.available_moves:
             m = 0
             game_2 = simulated_game.simulate_moves([mov])
-            for piece in game_2.pieces:
-                if piece.player == revers.turn:
-                    m += 1
-            possible_m_list.append(m)
+            vals, counts = np.unique(game_2.grid, return_counts=True)
+            for i, val in enumerate(vals):
+                if val == revers.turn:
+                    possible_m_list.append(counts[i])
         if len(possible_m_list) > 0:
             move_m[move] = sum(possible_m_list) / len(possible_m_list)
         else:

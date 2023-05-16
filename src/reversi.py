@@ -9,7 +9,7 @@ from typing import List, Tuple, Optional
 from copy import deepcopy
 import numpy as np
 
-BoardGridType = np.array(int)
+BoardGridType = np.ndarray
 """
 Type for representing the state of the game board (the "grid")
 as a list of lists. Each entry will either be an integer (meaning
@@ -524,10 +524,7 @@ class Reversi(ReversiBase):
         y, x = dir
         if (0 <= r - y < self.size and
              0 <= c - x < self.size and 0 <= r + y < self.size and 
-             0 <= c + x < self.size) and (self.grid[r + y][c + x] and not 
-                                          self.grid[r][c] == self.turn and 
-                                          (rec > 1 or not 
-                                           self.grid[r - y][c - x])):
+             0 <= c + x < self.size) and self.grid[r + y][c + x]:
             if self.grid[r + y][c + x] == self.turn:
                 return (r - rec * y, c - rec * x)
             else:
@@ -561,14 +558,16 @@ class Reversi(ReversiBase):
                 self.first_two = False
         if not self.first_two:
             for piece in self.pieces:
-                for dir in DIRECTION_LIST:
-                    if self.move_works(piece, dir):
-                        r, c = piece.pos
+                if piece.player != self.turn:
+                    for dir in DIRECTION_LIST:
                         y, x = dir
-                        if dir in move_list:
-                            move_list[dir].append((r - y, c - x))
-                        else:
-                            move_list[dir] = [(r - y, c - x)]
+                        if ((-y, -x) not in piece.adjacent 
+                            and self.move_works(piece, dir)):
+                                r, c = piece.pos
+                                if dir in move_list:
+                                    move_list[dir].append((r - y, c - x))
+                                else:
+                                    move_list[dir] = [(r - y, c - x)]
         return move_list
     
     @property
