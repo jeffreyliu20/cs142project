@@ -68,7 +68,8 @@ def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
             except IndexError:
                 possible_m_list.append(counts[1])
             revers.roll_back()
-            
+        revers.roll_back()
+
         if len(possible_m_list) > 0:
             move_m[move] = sum(possible_m_list) / len(possible_m_list)
         else:
