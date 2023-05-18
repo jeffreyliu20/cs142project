@@ -9,6 +9,7 @@ from typing import Tuple
 import random
 import click
 import numpy as np
+import copy
 
 def choose_random_move(revers: Reversi) -> Tuple[int, int]:
     """
@@ -32,11 +33,16 @@ def choose_high_n_move(revers: Reversi) -> Tuple[int, int]:
     """
     move_n = {}
     for move in revers.available_moves:
-        simulated_game = revers.simulate_moves([move])
-        vals, counts = np.unique(simulated_game.grid, return_counts=True)
-        for i, val in enumerate(vals):
-            if val == revers.turn:
-                move_n[move] = counts[i]
+        revers.apply_move(move)
+        _, counts = np.unique(revers.grid, return_counts=True)
+        try:
+            move_n[move] = counts[2]
+        except IndexError:
+            move_n[move] = counts[1]
+        revers.roll_back()
+        
+
+
     return max(move_n, key= lambda x: move_n[x])
 
 def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
@@ -52,22 +58,23 @@ def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
     move_m = {}
 
     for move in revers.available_moves:
-        simulated_game = revers.simulate_moves([move])
+        revers.apply_move(move)
         possible_m_list = []
-        for mov in simulated_game.available_moves:
-            m = 0
-            game_2 = simulated_game.simulate_moves([mov])
-            vals, counts = np.unique(game_2.grid, return_counts=True)
-            for i, val in enumerate(vals):
-                if val == revers.turn:
-                    possible_m_list.append(counts[i])
+        for mov in revers.available_moves:
+            revers.apply_move(mov)
+            _, counts = np.unique(revers.grid, return_counts=True)
+            try:
+                possible_m_list.append(counts[2])
+            except IndexError:
+                possible_m_list.append(counts[1])
+            revers.roll_back()
+            
         if len(possible_m_list) > 0:
             move_m[move] = sum(possible_m_list) / len(possible_m_list)
         else:
             move_m[move] = 64
-    if len(move_m.keys()) == 0:
-        print(revers.available_moves)
-        print(revers.grid)
+
+    
     return max(move_m, key= lambda x: move_m[x])
 
 
@@ -82,16 +89,6 @@ def play_game(player1, player2) -> str:
     game = Reversi(side=8, players=2, othello=False)
 
     while not game.done:
-        n = 0
-        while True:
-            if n == game.num_players:
-                game.end_game()
-            if len(game.available_moves) == 0:
-                game.skip_turn()
-                n += 1
-            else:
-                break
-
         if game.turn == 1:
             if player1 == "random":
                 move = choose_random_move(game)
@@ -106,6 +103,7 @@ def play_game(player1, player2) -> str:
                 move = choose_high_n_move(game)
             if player2 == "very-smart":
                 move = choose_high_m_move(game)
+
         game.apply_move(move)
 
     if len(game.outcome) > 1:

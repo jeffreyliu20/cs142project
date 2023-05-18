@@ -99,7 +99,18 @@ class Board:
         self._grid[r][c] = player
         self._pieces[r][c] = new_piece
 
-    def update_piece(self, pos: Tuple[int, int], player: int):
+    def remove_piece(self, pos: Tuple[int, int]) -> None:
+        """
+        Removes a piece from the board
+        
+        Parameters: none beyond self
+        Returns: nothing
+        """
+        r, c = pos
+        self._grid[r][c] = 0
+        self._pieces[r][c] = None
+
+    def update_piece(self, pos: Tuple[int, int], player: int) -> None:
         """
         Changes the piece at a given point in the grid to a different player
         """
@@ -108,7 +119,7 @@ class Board:
             self._grid[r][c] = player
             self._pieces[r][c].update_player(player)
         else:
-            print("No piece at that position")
+            raise ValueError("No piece at that position")
 
     def get_piece(self, pos: Tuple[int, int]) -> "Piece":
         """
@@ -427,6 +438,7 @@ class ReversiBase(ABC):
 class Reversi(ReversiBase):
 
     _outcome: List[int]
+    _moves: List[Tuple[int, List[Tuple[Tuple[int, int], int]]]]
 
     def __init__(self, side: int, players: int, othello: bool):
         """
@@ -459,6 +471,7 @@ class Reversi(ReversiBase):
         self._done = False
         self._outcome = []
         self.first_two = True
+        self._moves = []
 
         if othello:
             self._board.add_piece(2, (side // 2 - 1, side // 2 - 1))
@@ -485,8 +498,8 @@ class Reversi(ReversiBase):
     def grid(self) -> BoardGridType:
         """
         Returns the state of the game board as a list of lists.
-        Each entry can either be an integer (meaning there is a
-        piece at that location for that player) or None,
+        Each entry can either be a positive integer (meaning there is a
+        piece at that location for that player) or 0,
         meaning there is no piece in that location. Players are
         numbered from 1.
         """
@@ -528,12 +541,12 @@ class Reversi(ReversiBase):
 
         r, c = piece.pos
         y, x = dir
-        if (0 <= r - y < self.size and
-             0 <= c - x < self.size and 0 <= r + y < self.size and 
-             0 <= c + x < self.size) and (self.grid[r][c] != self.turn and 
-                                          self.grid[r + y][c + x] 
-                                          and (not self.grid[r - y][c - x] 
-                                               or rec > 1)):
+        # explain this conditional
+        if  ((0 <= r - y < self.size and 0 <= c - x < self.size 
+             and 0 <= r + y < self.size and 0 <= c + x < self.size)
+             and self.grid[r][c] != self.turn and self.grid[r + y][c + x] 
+             and (not self.grid[r - y][c - x] or rec > 1)):
+            
             if self.grid[r + y][c + x] == self.turn:
                 return (r - rec * y, c - rec * x)
             else:
@@ -554,27 +567,34 @@ class Reversi(ReversiBase):
 
         if self.done:
             return {}
+        
         move_list = {}
+
         if self.first_two:
             center_filled = True
             middle = self.size // 2
             r_center = self.num_players // 2
+
             for r in range(middle - r_center, middle + r_center):
                 for c in range(middle - r_center, middle + r_center):
                     if not self.grid[r][c]:
                         move_list[(r, c)] = [(r, c)]
                         center_filled = False
+                
             if center_filled:
                 self.first_two = False
-                move_list = {}
+
         if not self.first_two:
             for piece in self.pieces:
                 if piece.player != self.turn:
                     for dir in DIRECTION_LIST:
+
                         r, c = piece.pos
                         y, x = dir
-                        if (self.move_works(piece, dir) and 
-                            not self.grid[r - y][c - x]):
+
+                        if ((0 <= r - y < self.size and 0 <= c - x < self.size) 
+                            and (not self.grid[r - y][c - x] and 
+                            self.move_works(piece, dir))):
                             if dir in move_list:
                                 move_list[dir].append((r - y, c - x))
                             else:
@@ -591,10 +611,12 @@ class Reversi(ReversiBase):
         any meaningful value.
         """
         move_list = []
+
         for dir_moves in list(self.find_moves().values()):
             for move in dir_moves:
                 if move not in move_list:
                     move_list.append(move)
+            
         return move_list
 
 
@@ -654,18 +676,7 @@ class Reversi(ReversiBase):
         method) could place a piece in the specified position,
         return True. Otherwise, return False.
         """
-        if self.first_two:
-            return pos in self.available_moves
-        else:
-            r, c = pos
-            for dir in DIRECTION_LIST:
-                y, x = dir
-                new_pos = (r + y, c + x)
-                if (0 <= r + y < self.size and 
-                    0 <= c + x < self.size) and self.grid[r + y][c + x]:
-                    if self.move_works(self._board.get_piece(new_pos), dir):
-                        return True
-            return False
+        return pos in self.available_moves
 
     def apply_move(self, pos: Tuple[int, int]) -> None:
         """
@@ -699,35 +710,59 @@ class Reversi(ReversiBase):
 
         Returns: None
         """
+        r, c = pos
+        if not (0 <= r < self.size and 0 <= c < self.size):
+            raise ValueError("Specified position outside board")
+        
         move_dict = self.find_moves()
-        if self.legal_move(pos):
-            self._board.add_piece(self.turn, pos)
-            for dir in DIRECTION_LIST:
-                if dir in move_dict:
-                    if pos in move_dict[dir]:
-                        r, c = pos
-                        y, x = dir
-                        new_y = r + y
-                        new_x = c + x
-                        while True:
-                            if ((0 <= new_y < self.size 
-                                and 0 <= new_x < self.size) 
-                                and self._board.grid[new_y][new_x] != self.turn):
-                                self._board.update_piece((new_y, new_x), 
-                                                         self.turn)
-                                new_y += y
-                                new_x += x
-                            else:
-                                break
-            if not self.first_two and len(np.unique(self.grid)) in [1, 2]:
+        
+        self._board.add_piece(self.turn, pos)
+        mv = [(pos, 0)]
+
+        for dir in DIRECTION_LIST:
+            if dir in move_dict:
+                if pos in move_dict[dir]:
+
+                    y, x = dir
+
+                    new_y = r + y
+                    new_x = c + x
+
+                    while True:
+                        if ((0 <= new_y < self.size 
+                            and 0 <= new_x < self.size) 
+                            and self.grid[new_y][new_x] != self.turn):
+
+                            mv.append(((new_y, new_x), 
+                                        self.grid[new_y][new_x]))
+                            self._board.update_piece((new_y, new_x), 
+                                                        self.turn)
+                            new_y += y
+                            new_x += x
+                        else:
+                            break
+
+        self._moves.append((self.turn, mv))    
+        
+        if (not self.first_two and len(np.unique(self.grid)) in [1, 2]
+            or len(self.pieces) == self.size ** 2):
+            self.end_game()
+
+        n = 0
+        while True:
+            if n == self.num_players:
                 self.end_game()
+                break
             if self._turn < self.num_players:
                 self._turn += 1
             else:
                 self._turn = 1
 
-        else:
-            print("Invalid move")
+            if len(self.available_moves) == 0:
+                n += 1
+            else:
+                break
+
 
     def skip_turn(self) -> None:
         """
@@ -750,16 +785,20 @@ class Reversi(ReversiBase):
         """
         final_dict = {}
         highest_pieces = 0
+
         for i in range(1, self.num_players + 1):
             final_dict[i] = 0
+
         for piece in self.pieces:
             final_dict[piece.player] += 1
+
         for player in final_dict:
             if final_dict[player] > highest_pieces:
                 self._outcome = [player]
                 highest_pieces = final_dict[player]
             elif final_dict[player] == highest_pieces:
                 self._outcome.append(player)
+
         self._done = True
         self._turn = 1
 
@@ -792,16 +831,48 @@ class Reversi(ReversiBase):
         new_side = len(grid)
         if new_side != self.size:
             raise ValueError("Input is not the same size as the current board")
+        
         new_board = Board(new_side)
         new_board.update_grid(grid)
+
         for row in grid:
             for square in row:
                 if square is not None and (square < 1 or 
                                            square > self.num_players):
                     raise ValueError("Grid contains invalid player")
+                
         self._board = new_board
         self._done = False
         self._outcome = []
+
+    def roll_back(self) -> None:
+        """
+        Undoes the most recent move
+        
+        Parameters: none beyond self
+        Returns: nothing
+        """
+        recent_move = self._moves.pop()
+
+        trn, mv = recent_move
+        self._turn = trn
+        
+        if self._done:
+            self._done = False
+            self._outcome = []
+
+
+        if len(mv) == 1:
+            self.first_two = True
+
+
+        for square in mv:
+            pos, player = square
+            if player > 0:
+                self._board.update_piece(pos, player)
+            else:
+                self._board.remove_piece(pos)
+
 
     def simulate_moves(self,
                        moves: ListMovesType
