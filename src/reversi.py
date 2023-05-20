@@ -541,7 +541,19 @@ class Reversi(ReversiBase):
 
         r, c = piece.pos
         y, x = dir
-        # explain this conditional
+
+        # The following conditional first checks to make sure the piece is not 
+        # on the edge of the board such that checking the space in or opposite 
+        # the specified direction will produce an error. This code is built 
+        # around checking whether pieces can be flipped, so it then checks to 
+        # make sure the specified piece was placed by a different player than 
+        # the one whose turn it is. Then, it checks to make sure there's a 
+        # piece in the given direction, because if a player doesn't have a 
+        # piece somewhere in the given direction, there's no way they can flip 
+        # pieces. Finally, it makes sure that either a piece could be placed 
+        # opposite the given direction (i.e. the given piece is on the end) 
+        # or the function has already called itself.
+
         if  ((0 <= r - y < self.size and 0 <= c - x < self.size 
              and 0 <= r + y < self.size and 0 <= c + x < self.size)
              and self.grid[r][c] != self.turn and self.grid[r + y][c + x] 
@@ -573,10 +585,12 @@ class Reversi(ReversiBase):
         if self.first_two:
             center_filled = True
             middle = self.size // 2
-            r_center = self.num_players // 2
+            lower_bound = middle - self.num_players // 2
+            upper_bound = middle + self.num_players // 2
+            upper_bound += self.size % 2
 
-            for r in range(middle - r_center, middle + r_center):
-                for c in range(middle - r_center, middle + r_center):
+            for r in range(lower_bound, upper_bound):
+                for c in range(lower_bound, upper_bound):
                     if not self.grid[r][c]:
                         move_list[(r, c)] = [(r, c)]
                         center_filled = False
@@ -659,7 +673,13 @@ class Reversi(ReversiBase):
         return the number of the player (players are numbered
         from 1). Otherwise, return None.
         """
-        return self._board.get_piece(pos).player
+        r, c = pos
+        if 0 <= r < self.size and 0 <= c < self.size:
+            if self.grid[r][c]:
+                return self.grid[r][c]
+            return None
+        else:
+            return ValueError("Specified position outside board")
 
     def legal_move(self, pos: Tuple[int, int]) -> bool:
         """
@@ -844,6 +864,7 @@ class Reversi(ReversiBase):
         self._board = new_board
         self._done = False
         self._outcome = []
+        self._turn = turn
 
     def roll_back(self) -> None:
         """

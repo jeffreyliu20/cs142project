@@ -9,7 +9,6 @@ from typing import Tuple
 import random
 import click
 import numpy as np
-import copy
 
 def choose_random_move(revers: Reversi) -> Tuple[int, int]:
     """

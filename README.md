@@ -5,3 +5,43 @@ Team members:
 - Sylvia Kim (sylviakim) - worked on gui
 - Enoch Woldu (ewoldu) - worked on tui
 - Jeffrey Liu (jliu26) - worked on qa
+
+Enhancements:
+    implemented the board as a numpy array
+
+Improvements:
+-Game Logic:
+    [Code completeness] This only works if your non-Othello game is 8x8.:
+        Addressed by implementing the lower_bound and upper_bound variables
+         from lines 588-593 of reversi.py
+
+    [Code completeness] Something seems wrong here, dir_moves should just be a 
+    tuple, so this loop makes move an integer.:
+        This piece of feedback was incorrect - find_moves outputs a dictionary
+         mapping tuples to lists of tuples, meaning that find_moves.values()
+         returns a list of lists of tuples, meaning that move is a tuple.
+
+    [Code completeness] This does not handle the case where get_piece returns 
+    None (this will throw an error).
+        Changed the get_piece function (reversi.py lines 676-680) to return
+         the value on the grid in the given position. Because the grid is a 
+         numpy array that uses 0 to indicate no piece, the function returns
+         None iff the given position on the grid is zero.
+
+    [Code completeness] This does not handle the case where neither player 
+    has available moves, but the game is still over. This makes the done 
+    function incorrect as well.
+        The code we wrote to skip turns after a move is applied 
+         (reversi.py 772-784) should fix this
+
+    [Code completeness] Since the turn counter is 1-indexed, this is incorrect. 
+    When it is the nth player's turn to play (when n = num_players), their 
+    turn will be skipped.
+        This piece of feedback was incorrect - after a player applies a move, 
+        their turn is over and should thus be skipped (reversi.py 772-784)
+
+    [Code completeness] Your load game function does not change the turn.
+        reversi.py 867 changes the turn
+        
+-Bot:
+    This component received two S's in Milestone 2.
