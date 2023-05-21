@@ -212,6 +212,8 @@ def test_apply_move_2():
     reversi.apply_move((3, 5))
     reversi.apply_move((4, 5))
 
+    print (reversi.available_moves)
+
     assert reversi.legal_move((5, 2))
     assert reversi.legal_move((5, 3))
     assert reversi.legal_move((5, 4))
