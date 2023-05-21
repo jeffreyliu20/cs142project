@@ -105,6 +105,7 @@ def play_game(player1, player2) -> str:
                 move = choose_high_m_move(game)
 
         game.apply_move(move)
+        game.check_for_dead_moves()
 
     if len(game.outcome) > 1:
         return "Tie"
