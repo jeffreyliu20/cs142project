@@ -3,6 +3,7 @@ import sys
 from typing import List, Optional, Tuple, Set, Callable
 from mocks import ReversiStub, ReversiMock
 from reversi import BoardGridType, Reversi
+from bot import choose_random_move, choose_high_n_move, choose_high_m_move
 
 import click
 
@@ -33,16 +34,17 @@ CLOCK_CHARS = {
 }
 
 @click.command()
-@click.option('-n', default=2, show_default=True, type=int,
+@click.option('-n', '--num_players', default=2, show_default=True, type=int,
               help="Number of Players in the game")
-@click.option('-s', default=8, show_default=True, type=int,
+@click.option('-s', 'board_size', default=8, show_default=True, type=int,
               help="Length of the sides of the board")
 @click.option('--othello/--non-othello', default=False, show_default=True,
               help="Whether or not the game is othello or not othello")
-def play_game(n, s, othello):
-    
-    num_players = n
-    board_size = s
+@click.option('--bot', default='none', show_default=True,
+              type=click.Choice(['none', "random", "smart", "very-smart"]),
+              help="What type of bot strategy you want to use")
+
+def play_game(num_players, board_size, othello, bot):
     
     if board_size < 3:
         print("Board size must be 3 or greater. Please try again.")
@@ -54,6 +56,8 @@ def play_game(n, s, othello):
     else:
 
         game = Reversi(board_size, num_players, othello)
+
+        bot_in_game = bot != "none"
         
         grid_size = 2 * board_size + 1
         
@@ -111,55 +115,74 @@ def play_game(n, s, othello):
         board_str = "\n".join(board_row)
         print(board_str)
 
+        if bot_in_game:
+            print()
+            print(f"The bot will be Player {num_players}")
+
         earlyEnd = False
         players_skipped = 0
 
         while not game.done and players_skipped < num_players:
 
-            available_moves = game.available_moves
+            moves = game.available_moves
             turn = game._turn
 
-            if len(available_moves) == 0:
+            if len(moves) == 0:
                 print()
                 print(f"Player {turn} has no available moves")
                 print(f"Skipping Player {turn}'s turn")
                 print()
-                game.skip_turn()
                 players_skipped += 1
             else:
-                print()
-                print(f"It is Player {turn}'s turn to make a move.")
-                print("Choose one of the following move options:")
-                print()
+                move_r, move_c = (-1,-1)
 
-                players_skipped = 0
+                if bot_in_game and turn == num_players:
+                    bot_move = None
+                    if bot == "random":
+                        bot_move = choose_random_move(game)
+                    elif bot == "smart":
+                        bot_move = choose_high_n_move(game)
+                    else:
+                        bot_move = choose_high_m_move(game)
+                    move_r, move_c = bot_move
+                    print()
+                    print()
+                    print(f"Bot is making the move ({move_r}, {move_c})")
+                    print()
+                else:
+                    print()
+                    print()
+                    print(f"It is Player {turn}'s turn to make a move.")
+                    print("Choose one of the following move options:")
+                    print()
 
-                for k, move in enumerate(available_moves):
-                    i, j = move
-                    print(f"{k+1}) ({i}, {j})")
-                
-                print()
-                print("If you want to exit the game, type 'quit' " + 
-                    "and then press Enter")
-                choice = input("Enter your choice and then press Enter: ")
-                print()
-                
-                while True:
-                    if choice == "quit":
-                        break
-                    if choice.isdigit() and 0 < int(choice) <= len(available_moves):
-                        break
-                    print("You must input an integer that is the same as one of " +
-                        "the options")
+                    players_skipped = 0
+
+                    for k, move in enumerate(moves):
+                        i, j = move
+                        print(f"{k+1}) ({i}, {j})")
+                    
+                    print()
+                    print("If you want to exit the game, type 'quit' " + 
+                        "and then press Enter")
                     choice = input("Enter your choice and then press Enter: ")
+                    print()
+                    
+                    while True:
+                        if choice == "quit":
+                            break
+                        if choice.isdigit() and 0 < int(choice) <= len(moves):
+                            break
+                        print("You must input an integer that is the same as one " +
+                            "of the options")
+                        choice = input("Enter your choice and then press Enter: ")
 
-                if choice == "quit":
-                    earlyEnd = True
-                    break
+                    if choice == "quit":
+                        earlyEnd = True
+                        break
 
-                move_r, move_c = available_moves[int(choice)-1]
+                    move_r, move_c = moves[int(choice)-1]
 
-                # May be redundant
                 if not game.legal_move((move_r, move_c)):
                     print("Not a legal move, please try again")
                     continue
@@ -181,6 +204,8 @@ def play_game(n, s, othello):
                 board_row.append(bottom_row)
                 board_str = "\n".join(board_row)
                 print(board_str)
+
+            game.skip_turn()
 
         if earlyEnd:
             print("Game Ended early")
