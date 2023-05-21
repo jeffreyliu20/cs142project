@@ -474,10 +474,10 @@ class Reversi(ReversiBase):
         self._moves = []
 
         if othello:
-            self._board.add_piece(2, (side // 2 - 1, side // 2 - 1))
-            self._board.add_piece(2, (side // 2, side // 2))
-            self._board.add_piece(1, (side // 2, side // 2 - 1))
-            self._board.add_piece(1, (side // 2 - 1, side // 2))
+            self._board.add_piece(1, (side // 2 - 1, side // 2 - 1))
+            self._board.add_piece(1, (side // 2, side // 2))
+            self._board.add_piece(2, (side // 2, side // 2 - 1))
+            self._board.add_piece(2, (side // 2 - 1, side // 2))
             self.first_two = False
 
     @property
