@@ -10,7 +10,7 @@ Enhancements:
     implemented the board as a numpy array
 
 Improvements:
--Game Logic:
+- Game Logic:
     [Code completeness] This only works if your non-Othello game is 8x8.:
         Addressed by implementing the lower_bound and upper_bound variables
          from lines 588-593 of reversi.py
