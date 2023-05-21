@@ -39,7 +39,6 @@ CLOCK_CHARS = {
               help="Length of the sides of the board")
 @click.option('--othello/--non-othello', default=False, show_default=True,
               help="Whether or not the game is othello or not othello")
-@click.option('--bot', default=)
 def play_game(n, s, othello):
     
     num_players = n
