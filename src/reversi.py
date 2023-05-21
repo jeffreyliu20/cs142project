@@ -773,10 +773,8 @@ class Reversi(ReversiBase):
             if n == self.num_players:
                 self.end_game()
                 break
-            if self._turn < self.num_players:
-                self._turn += 1
-            else:
-                self._turn = 1
+            
+            self.skip_turn()
 
             if len(self.available_moves) == 0:
                 n += 1
