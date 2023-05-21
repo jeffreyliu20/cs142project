@@ -7,7 +7,8 @@ Team members:
 - Jeffrey Liu (jliu26) - worked on qa
 
 Enhancements:
-    implemented the board as a numpy array
+    -implemented the board as a numpy array
+    -added bot player support to the TUI
 
 Improvements:
 - Game Logic:
@@ -47,4 +48,7 @@ Improvements:
         reversi.py 867 changes the turn
         
 -Bot:
+    This component received two S's in Milestone 2.
+    
+-TUI:
     This component received two S's in Milestone 2.
