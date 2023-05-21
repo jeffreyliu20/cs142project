@@ -47,8 +47,8 @@ Improvements:
     [Code completeness] Your load game function does not change the turn.
         reversi.py 867 changes the turn
         
--Bot:
+- Bot:
     This component received two S's in Milestone 2.
     
--TUI:
+- TUI:
     This component received two S's in Milestone 2.
