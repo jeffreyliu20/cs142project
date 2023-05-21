@@ -437,6 +437,10 @@ class ReversiBase(ABC):
 
 class Reversi(ReversiBase):
 
+    _board: Board
+    _turn: int
+    _done: bool
+    first_two: bool
     _outcome: List[int]
     _moves: List[Tuple[int, List[Tuple[Tuple[int, int], int]]]]
 
@@ -697,7 +701,7 @@ class Reversi(ReversiBase):
         return True. Otherwise, return False.
         """
         r, c = pos
-        
+
         if 0 <= r < self.size and 0 <= c < self.size:
             return pos in self.available_moves
         else:
