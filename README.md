@@ -32,7 +32,7 @@ Improvements:
     has available moves, but the game is still over. This makes the done 
     function incorrect as well.
         The code we wrote to skip turns after a move is applied 
-         (reversi.py 772-784) should fix this
+         (reversi.py 772-793) should fix this
 
     [Code completeness] Since the turn counter is 1-indexed, this is incorrect. 
     When it is the nth player's turn to play (when n = num_players), their 
