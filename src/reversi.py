@@ -613,6 +613,7 @@ class Reversi(ReversiBase):
                                 move_list[dir].append((r - y, c - x))
                             else:
                                 move_list[dir] = [(r - y, c - x)]
+
         return move_list
     
     @property
@@ -762,7 +763,9 @@ class Reversi(ReversiBase):
                         else:
                             break
 
-        self._moves.append((self.turn, mv))    
+        self._moves.append((self.turn, mv))   
+
+        self._turn = 1 if self._turn == 2 else 2
         
         if (not self.first_two and len(np.unique(self.grid)) in [1, 2]
             or len(self.pieces) == self.size ** 2):
