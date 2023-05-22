@@ -7,10 +7,11 @@ Team members:
 - Jeffrey Liu (jliu26) - worked on qa
 
 Enhancements:
-    implemented the board as a numpy array
+    -implemented the board as a numpy array
+    -added bot player support to the TUI
 
 Improvements:
--Game Logic:
+- Game Logic:
     [Code completeness] This only works if your non-Othello game is 8x8.:
         Addressed by implementing the lower_bound and upper_bound variables
          from lines 588-593 of reversi.py
@@ -46,5 +47,8 @@ Improvements:
     [Code completeness] Your load game function does not change the turn.
         reversi.py 867 changes the turn
         
--Bot:
+- Bot:
+    This component received two S's in Milestone 2.
+    
+- TUI:
     This component received two S's in Milestone 2.

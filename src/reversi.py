@@ -437,6 +437,10 @@ class ReversiBase(ABC):
 
 class Reversi(ReversiBase):
 
+    _board: Board
+    _turn: int
+    _done: bool
+    first_two: bool
     _outcome: List[int]
     _moves: List[Tuple[int, List[Tuple[Tuple[int, int], int]]]]
 
@@ -680,7 +684,7 @@ class Reversi(ReversiBase):
                 return self.grid[r][c]
             return None
         else:
-            return ValueError("Specified position outside board")
+            raise ValueError("Specified position outside board")
 
     def legal_move(self, pos: Tuple[int, int]) -> bool:
         """
@@ -697,7 +701,12 @@ class Reversi(ReversiBase):
         method) could place a piece in the specified position,
         return True. Otherwise, return False.
         """
-        return pos in self.available_moves
+        r, c = pos
+
+        if 0 <= r < self.size and 0 <= c < self.size:
+            return pos in self.available_moves
+        else:
+            raise ValueError("Specified position outside the board")
 
     def apply_move(self, pos: Tuple[int, int]) -> None:
         """
