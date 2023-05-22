@@ -774,9 +774,7 @@ class Reversi(ReversiBase):
 
         self._moves.append((self.turn, mv))   
 
-        self._turn += 1
-        if self._turn > self.num_players:
-            self._turn = 1
+        self.skip_turn()
         
         if (not self.first_two and len(np.unique(self.grid)) in [1, 2]
             or len(self.pieces) == self.size ** 2):
@@ -798,13 +796,13 @@ class Reversi(ReversiBase):
             if n == self.num_players:
                 self.end_game()
                 break
-            
-            self.skip_turn()
 
             if len(self.available_moves) == 0:
                 n += 1
             else:
                 break
+
+            self.skip_turn()
 
     def skip_turn(self) -> None:
         """

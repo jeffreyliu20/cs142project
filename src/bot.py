@@ -58,7 +58,6 @@ def choose_high_m_move(revers: Reversi) -> Tuple[int, int]:
 
     for move in revers.available_moves:
         revers.apply_move(move)
-        revers.skip_turn()
         possible_m_list = []
         for mov in revers.available_moves:
             revers.apply_move(mov)
