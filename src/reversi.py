@@ -560,11 +560,10 @@ class Reversi(ReversiBase):
 
         if  ((0 <= r - y < self.size and 0 <= c - x < self.size 
              and 0 <= r + y < self.size and 0 <= c + x < self.size)
-             and self._board.grid[r][c] != self.turn and 
-             self._board.grid[r + y][c + x] 
-             and (not self._board.grid[r - y][c - x] or rec > 1)):
+             and self.grid[r][c] != self.turn and self.grid[r + y][c + x] 
+             and (not self.grid[r - y][c - x] or rec > 1)):
             
-            if self._board.grid[r + y][c + x] == self.turn:
+            if self.grid[r + y][c + x] == self.turn:
                 return (r - rec * y, c - rec * x)
             else:
                 return self.move_works(self._board.piece_grid[r + y][c + x], # type: ignore
@@ -596,7 +595,7 @@ class Reversi(ReversiBase):
 
             for r in range(lower_bound, upper_bound):
                 for c in range(lower_bound, upper_bound):
-                    if not self._board.grid[r][c]:
+                    if not self.grid[r][c]:
                         move_list[(r, c)] = [(r, c)]
                         center_filled = False
                 
@@ -612,7 +611,7 @@ class Reversi(ReversiBase):
                         y, x = dir
 
                         if ((0 <= r - y < self.size and 0 <= c - x < self.size) 
-                            and (not self._board.grid[r - y][c - x] and 
+                            and (not self.grid[r - y][c - x] and 
                             self.move_works(piece, dir))):
                             if dir in move_list:
                                 move_list[dir].append((r - y, c - x))
@@ -681,8 +680,8 @@ class Reversi(ReversiBase):
         """
         r, c = pos
         if 0 <= r < self.size and 0 <= c < self.size:
-            if self._board.grid[r][c]:
-                return self._board.grid[r][c]
+            if self.grid[r][c]:
+                return self.grid[r][c]
             return None
         else:
             raise ValueError("Specified position outside board")
@@ -762,10 +761,10 @@ class Reversi(ReversiBase):
                     while True:
                         if ((0 <= new_y < self.size 
                             and 0 <= new_x < self.size)
-                            and self._board.grid[new_y][new_x] != self.turn):
+                            and self.grid[new_y][new_x] != self.turn):
 
                             mv.append(((new_y, new_x), 
-                                        self._board.grid[new_y][new_x]))
+                                        self.grid[new_y][new_x]))
                             self._board.update_piece((new_y, new_x), 
                                                         self.turn)
                             new_y += y
@@ -777,7 +776,7 @@ class Reversi(ReversiBase):
 
         self.skip_turn()
         
-        if (not self.first_two and len(np.unique(self._board.grid)) in [1, 2]
+        if (not self.first_two and len(np.unique(self.grid)) in [1, 2]
             or len(self.pieces) == self.size ** 2):
             self.end_game()
 
