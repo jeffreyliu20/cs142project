@@ -760,7 +760,7 @@ class Reversi(ReversiBase):
 
                     while True:
                         if ((0 <= new_y < self.size 
-                            and 0 <= new_x < self.size) 
+                            and 0 <= new_x < self.size)
                             and self.grid[new_y][new_x] != self.turn):
 
                             mv.append(((new_y, new_x), 
