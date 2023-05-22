@@ -82,7 +82,7 @@ class Board:
         final_list = []
         for row in self._pieces:
             final_list += row
-        return list(filter(lambda x: x is not None, final_list))
+        return list(filter(lambda x: x is not None, final_list)) # type: ignore
     
     
     def add_piece(self, player: int, pos: Tuple[int, int]) -> None:
@@ -117,11 +117,11 @@ class Board:
         r, c = pos
         if self._grid[r][c]:
             self._grid[r][c] = player
-            self._pieces[r][c].update_player(player)
+            self._pieces[r][c].update_player(player) # type: ignore
         else:
             raise ValueError("No piece at that position")
 
-    def get_piece(self, pos: Tuple[int, int]) -> "Piece":
+    def get_piece(self, pos: Tuple[int, int]) -> Optional["Piece"]:
         """
         Finds the piece at a specified point in the board
         Parameters:
@@ -566,8 +566,8 @@ class Reversi(ReversiBase):
             if self.grid[r + y][c + x] == self.turn:
                 return (r - rec * y, c - rec * x)
             else:
-                return self.move_works(self._board.piece_grid[r + y][c + x], 
-                                       dir, rec + 1)
+                return self.move_works(self._board.piece_grid[r + y][c + x], # type: ignore
+                                       dir, rec + 1) 
         else:
             return None
         
