@@ -774,7 +774,9 @@ class Reversi(ReversiBase):
 
         self._moves.append((self.turn, mv))   
 
-        self._turn = 1 if self._turn == 2 else 2
+        self._turn += 1
+        if self._turn > self.num_players:
+            self._turn = 1
         
         if (not self.first_two and len(np.unique(self.grid)) in [1, 2]
             or len(self.pieces) == self.size ** 2):
