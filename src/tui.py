@@ -208,16 +208,14 @@ def play_game(num_players, board_size, othello, bot):
 
             # game.skip_turn()
 
-        if earlyEnd:
-            print("Game Ended early")
+
+        game.end_game()
+        winners = game.outcome
+        if len(winners) == 1:
+            print(f"Congrats for Player {winners[0]} for a nice victory")
         else:
-            game.end_game()
-            winners = game.outcome
-            if len(winners) == 1:
-                print(f"Congrats for Player {winners[0]} for a nice victory")
-            else:
-                print("We have a tie between the following players:")
-                for person in winners:
-                    print(f"Player {person}")
+            print("We have a tie between the following players:")
+            for person in winners:
+                print(f"Player {person}")
 
 play_game()
