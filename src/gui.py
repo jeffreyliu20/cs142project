@@ -42,7 +42,7 @@ class ReversiGUI:
             border : int : number of pixels to use as border around elements
             cells_side : int : number of cells on a side of a square bitmap grid
         """
-        if board_size > 20 or board_size < 6:
+        if board_size < 3:
             print("The board size is not valid")
             sys.exit()
         
@@ -101,13 +101,21 @@ class ReversiGUI:
         textRect.center = (665, 80)
         self.surface.blit(text, textRect)
 
+        if self.reversi._done == True:
+            pygame.display.set_caption('Show Text')
+            font = pygame.font.Font('freesansbold.ttf', 20)
+            text = font.render(f"Player {self.reversi.turn}", True, white, green)
+            textRect = text.get_rect()
+            textRect.center = (665, 80)
+            self.surface.blit(text, textRect)
+
         for move in self.reversi.available_moves:
             rect = (self.border + move[1] * square,
                     self.border + move[0] * square,
                     square, square)
             fill = (211, 211, 211)
             pygame.draw.circle(self.surface, color=fill,
-                        center=(self.border + move[1] * square + square / 2, self.border + move[0] * square + square /2), radius=cells_side * 3,
+                        center=(self.border + move[1] * square + square / 2, self.border + move[0] * square + square /2), radius=square / 2.5,
                         width=10)
 
     def react_to(self):
