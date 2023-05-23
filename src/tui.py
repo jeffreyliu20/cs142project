@@ -36,7 +36,7 @@ CLOCK_CHARS = {
 @click.command()
 @click.option('-n', '--num_players', default=2, show_default=True, type=int,
               help="Number of Players in the game")
-@click.option('-s', 'board_size', default=8, show_default=True, type=int,
+@click.option('-s', '--board_size', default=8, show_default=True, type=int,
               help="Length of the sides of the board")
 @click.option('--othello/--non-othello', default=False, show_default=True,
               help="Whether or not the game is othello or not othello")
