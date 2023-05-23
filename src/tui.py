@@ -132,6 +132,7 @@ def play_game(num_players, board_size, othello, bot):
                 print(f"Player {turn} has no available moves")
                 print(f"Skipping Player {turn}'s turn")
                 print()
+                game.skip_turn()
                 players_skipped += 1
             else:
                 move_r, move_c = (-1,-1)
@@ -163,9 +164,9 @@ def play_game(num_players, board_size, othello, bot):
                         print(f"{k+1}) ({i}, {j})")
                     
                     print()
-                    print("If you want to exit the game, type 'quit' " + 
-                        "and then press Enter")
-                    choice = input("Enter your choice and then press Enter: ")
+                    print("If you want to exit the game, type 'quit', " + 
+                        "then press Enter")
+                    choice = input("Enter your choice, then press Enter: ")
                     print()
                     
                     while True:
@@ -173,9 +174,9 @@ def play_game(num_players, board_size, othello, bot):
                             break
                         if choice.isdigit() and 0 < int(choice) <= len(moves):
                             break
-                        print("You must input an integer that is the same as one " +
-                            "of the options")
-                        choice = input("Enter your choice and then press Enter: ")
+                        print("You must input an integer that is the same as " +
+                            "one of the options")
+                        choice = input("Enter your choice, then press Enter: ")
 
                     if choice == "quit":
                         earlyEnd = True
@@ -205,7 +206,7 @@ def play_game(num_players, board_size, othello, bot):
                 board_str = "\n".join(board_row)
                 print(board_str)
 
-            game.skip_turn()
+            # game.skip_turn()
 
         if earlyEnd:
             print("Game Ended early")
