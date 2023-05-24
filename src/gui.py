@@ -114,9 +114,13 @@ class ReversiGUI:
             font = pygame.font.Font('freesansbold.ttf', 20)
             
             if len(self.reversi.outcome) == 1:
-                text = font.render(f"Winner is Player {self.reversi.outcome[0]}", True, white, green)
+                text = font.render(f"Winner is", True, white, green)
                 textRect = text.get_rect()
-                textRect.center = (665, 150)
+                textRect.center = (700, 160)
+                self.surface.blit(text, textRect)
+                text = font.render(f"Player {self.reversi.outcome[0]}", True, white, green)
+                textRect = text.get_rect()
+                textRect.center = (700, 200)
                 self.surface.blit(text, textRect)
             else:
                 text = font.render(f"Draw", True, white, green)
