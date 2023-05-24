@@ -292,7 +292,7 @@ def test_winner_1():
     arr[0][0] = 0
     arr[0][1] = 2
     reversi.load_game(1, arr)
-    reversi.apply_move(0, 0)
+    reversi.apply_move((0, 0))
 
     expected = [[(0,0),(0,1),(0,2),(0,3),(1,0),(1,1)(1,2),(1,3),(2,0),(2,1),(2,2),(2,3)],
                 [(3,0),(3,1),(3,2),(3,3)]]
