@@ -651,23 +651,33 @@ def test_available_moves_9x9_non_othello_after9():
     reversi = Reversi(side=9, players=3, othello=False)
 
     assert reversi.first_two
-    reversi.apply_move((3,3))
-    reversi.apply_move((3,4))
-    reversi.apply_move((4,4))
-    reversi.apply_move((4,3))
-    reversi.apply_move((5,3))
-    reversi.apply_move((4,5))
-    reversi.apply_move((5,5))
-    reversi.apply_move((5,3))
-    reversi.apply_move((5,4))
+
+    arr = np.zeros((9, 9))
+
+    positions_to_change = {
+    (3, 3): 1,
+    (4, 3): 1,
+    (5, 5): 1,
+    (3, 4): 2,
+    (5, 3): 2,
+    (3, 5): 2,
+    (4, 4): 3,
+    (4, 5): 3,
+    (5, 4): 3
+    }
+
+    for position, value in positions_to_change.items():
+        row, column = position
+        arr[row][column] = value
+    reversi.load_game(1, arr)
+
     expected = {
-        (2, 2),
         (2, 5),
         (3, 6),
         (4, 6),
         (5, 2),
         (6, 3),
-        (6, 6)
+        (6, 5)
     }
 
     assert set(reversi.available_moves) == expected
@@ -680,25 +690,32 @@ def test_legal_move_9x9_non_othello_after9():
 
     reversi = Reversi(side=9, players=3, othello=False)
 
+    arr = np.zeros((9, 9))
 
-    reversi.apply_move((3,3))
-    reversi.apply_move((3,4))
-    reversi.apply_move((4,4))
-    reversi.apply_move((4,3))
-    reversi.apply_move((5,3))
-    reversi.apply_move((4,5))
-    reversi.apply_move((5,5))
-    reversi.apply_move((5,3))
-    reversi.apply_move((5,4))
+    positions_to_change = {
+    (3, 3): 1,
+    (4, 3): 1,
+    (5, 5): 1,
+    (3, 4): 2,
+    (5, 3): 2,
+    (3, 5): 2,
+    (4, 4): 3,
+    (4, 5): 3,
+    (5, 4): 3
+    }
+
+    for position, value in positions_to_change.items():
+        row, column = position
+        arr[row][column] = value
+    reversi.load_game(1, arr)
 
     legal = {
-        (2, 2),
         (2, 5),
         (3, 6),
         (4, 6),
         (5, 2),
         (6, 3),
-        (6, 6)
+        (6, 5)
     }
 
 
