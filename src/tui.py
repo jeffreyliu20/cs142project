@@ -206,8 +206,6 @@ def play_game(num_players, board_size, othello, bot):
                 board_str = "\n".join(board_row)
                 print(board_str)
 
-            # game.skip_turn()
-
 
         game.end_game()
         winners = game.outcome
