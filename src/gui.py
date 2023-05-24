@@ -1,8 +1,6 @@
 import sys
 from typing import List, Optional, Tuple, Set, Callable
-from mocks import ReversiStub, ReversiMock
 from reversi import Reversi
-from math import sqrt
 
 import pygame
 import click
@@ -33,7 +31,7 @@ class ReversiGUI:
     clock : pygame.time.Clock
     reversi : Reversi
 
-    def __init__(self, num_players : int, board_size: int, othello : bool, window: int = 600, border: int = 10,
+    def __init__(self, num_players: int = 2, board_size: int = 8, othello : bool = False, window: int = 600, border: int = 10,
                  cells_side: int = 32):
         """
         Constructor
@@ -111,13 +109,20 @@ class ReversiGUI:
         textRect.center = (665, 80)
         self.surface.blit(text, textRect)
 
-        if self.reversi._done == True:
+        if self.reversi.done == True:
             pygame.display.set_caption('Show Text')
             font = pygame.font.Font('freesansbold.ttf', 20)
-            text = font.render(f"Player {self.reversi.turn}", True, white, green)
-            textRect = text.get_rect()
-            textRect.center = (665, 80)
-            self.surface.blit(text, textRect)
+            
+            if len(self.reversi.outcome) == 1:
+                text = font.render(f"Winner is Player {self.reversi.outcome[0]}", True, white, green)
+                textRect = text.get_rect()
+                textRect.center = (665, 150)
+                self.surface.blit(text, textRect)
+            else:
+                text = font.render(f"Draw", True, white, green)
+                textRect = text.get_rect()
+                textRect.center = (665, 150)
+                self.surface.blit(text, textRect)
 
         for move in self.reversi.available_moves:
             rect = (self.border + move[1] * square,
