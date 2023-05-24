@@ -53,3 +53,6 @@ Improvements:
     
 - TUI:
     This component received two S's in Milestone 2.
+    
+- QA:
+    This component received two S's in Milestone 2.

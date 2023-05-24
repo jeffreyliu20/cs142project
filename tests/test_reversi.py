@@ -5,15 +5,7 @@ Tests for the group implementation
 import pytest
 import numpy as np
 
-from reversi import Reversi
-
-
-def verify_size(expected: int) -> bool:
-    """
-    Test whether we can correctly create a (non-Othello) 4x4 game
-    """
-    #reversi = Reversi(side=4, players=2, othello=False)
-    pass
+from reversi import Reversi #type:ignore
 
 
 def test_create_1():
@@ -294,8 +286,10 @@ def test_winner_1():
     reversi.load_game(1, arr)
     reversi.apply_move((0, 0))
 
-    expected = [[(0,0),(0,1),(0,2),(0,3),(1,0),(1,1)(1,2),(1,3),(2,0),(2,1),(2,2),(2,3)],
-                [(3,0),(3,1),(3,2),(3,3)]]
+    expected = [
+    [(0,0),(0,1),(0,2),(0,3),(1,0),(1,1),(1,2),(1,3),(2,0),(2,1),(2,2),(2,3)],
+    [(3, 0), (3, 1), (3, 2), (3, 3)]
+]
 
     for player, piece_list in enumerate(expected):
         for piece in piece_list:
@@ -738,34 +732,31 @@ def test_winner_2():
     """
 
     reversi = Reversi(side=5, players=3, othello=False)
-    reversi.apply_move((1, 1))
-    reversi.apply_move((3, 1))
-    reversi.apply_move((2, 2))
-    reversi.apply_move((1, 3))
-    reversi.apply_move((1, 2))
-    reversi.apply_move((2, 3))
-    reversi.apply_move((3, 3))
-    reversi.apply_move((2, 1))
-    reversi.apply_move((3, 2))
-    reversi.apply_move((3, 0))
-    reversi.apply_move((2, 4)) #player 3 eliminated, turn skip for rest of game
-    reversi.apply_move((0, 2))
-    reversi.apply_move((4, 1))
-    reversi.apply_move((2, 0))
-    reversi.apply_move((0, 1))
-    reversi.apply_move((4, 2))
-    reversi.apply_move((0, 4))
-    reversi.apply_move((1, 4))
-    reversi.apply_move((3, 4))
-    reversi.apply_move((0, 0))
-    reversi.apply_move((0, 3))
-    reversi.apply_move((1, 0))
-    reversi.apply_move((4, 0))
-    reversi.apply_move((4, 4))
-    reversi.apply_move((4, 3))
+    arr = np.ones((5, 5))
 
-    expected = [[(0,0),(0,1),(0,2),(1,0),(1,1),(1,2),(1,4),(2,0),(3,0),(4,4)],
-                [(0,3),(0,4),(1,3),(2,1),(2,2),(2,3),(2,4),(3,1),(3,2),(3,3),(3,4),(4,0),(4,1),(4,2),(4,3)]]
+    positions_to_change = {
+    (0, 0): 0,
+    (0, 1): 2,
+    (4, 3): 2,
+    (4, 4): 3,
+    }
+
+    for position, value in positions_to_change.items():
+        row, column = position
+        arr[row][column] = value
+    reversi.load_game(1, arr)
+
+    reversi.apply_move((0,0))
+
+
+    expected = [
+    [(0,0),(0,1),(0,2),(0,3),(0,4),
+     (1,0),(1,1),(1,2),(1,3),(1,4),
+     (2,0),(2,1),(2,2),(2,3),(2,4),
+     (3,0),(3,1),(3,2),(3,3),(3,4),
+     (4,0),(4,1),(4,2)],
+    [(4,3)],
+    [(4,4)]]
 
     for player, piece_list in enumerate(expected):
         for piece in piece_list:
@@ -773,7 +764,7 @@ def test_winner_2():
 
 
     assert reversi.done
-    assert reversi.outcome == [2]
+    assert reversi.outcome == [1]
 
 
 def test_load_game_1():
@@ -857,27 +848,16 @@ def test_simulate_move_1():
 
     grid_orig = reversi.grid
 
-    future_reversi = reversi.simulate_moves([(3, 5)])
+    future_reversi = reversi.simulate_moves([(3, 2)])
 
     legal = {
         (2, 2),
-        (2, 3),
         (2, 4),
-        (2, 5),
-        (3, 2),
-        (3, 5),
-        (4, 2),
-        (4, 5),
-        (5, 2),
-        (5, 3),
-        (5, 4),
-        (5, 5),
-        (0, 0),
-        (7, 7),
+        (5, 2)
     }
 
     # Check that the original game state has been preserved
-    assert reversi.grid == grid_orig
+    assert np.array_equal(reversi.grid, grid_orig)
     assert reversi.turn == 1
     assert set(reversi.available_moves) == legal
     assert not reversi.done
@@ -885,9 +865,11 @@ def test_simulate_move_1():
 
     # Check that the returned object corresponds to the
     # state after making the move.
-    legal.remove((3, 5))
-    legal.update({(2, 6), (3, 6), (4, 6)})
-    assert future_reversi.grid != grid_orig
+    legal.remove({(2, 2),
+        (2, 4),
+        (5, 2)})
+    legal.update({(2, 3), (3, 2), (5, 4),(4,5)})
+    assert not np.array_equal(future_reversi.grid, grid_orig)
     assert future_reversi.turn == 2
     assert set(future_reversi.available_moves) == legal
     assert not future_reversi.done
@@ -904,27 +886,17 @@ def test_simulate_move_3():
 
     grid_orig = reversi.grid
 
-    future_reversi = reversi.simulate_moves([(3, 5), (2,5)])
+    future_reversi = reversi.simulate_moves([(3, 2), (2,2)])
 
     legal = {
-        (2, 2),
+        (1, 2),
         (2, 3),
-        (2, 4),
-        (2, 5),
-        (3, 2),
-        (3, 5),
-        (4, 2),
         (4, 5),
-        (5, 2),
-        (5, 3),
         (5, 4),
-        (5, 5),
-        (0, 0),
-        (7, 7),
     }
 
     # Check that the original game state has been preserved
-    assert reversi.grid == grid_orig
+    assert np.array_equal(reversi.grid, grid_orig)
     assert reversi.turn == 1
     assert set(reversi.available_moves) == legal
     assert not reversi.done
@@ -932,10 +904,185 @@ def test_simulate_move_3():
 
     # Check that the returned object corresponds to the
     # state after making the move.
-    legal.remove((3, 5))
-    legal.update({(2, 6), (3, 6), (4, 6)})
-    assert future_reversi.grid != grid_orig
-    assert future_reversi.turn == 2
+    legal.remove({(1, 2),
+        (2, 3),
+        (4, 5),
+        (5, 4),
+    })
+    legal.update({(2, 3), (3, 2), (5, 4),(4,5)})
+    assert not np.array_equal(future_reversi.grid, grid_orig)
+    assert future_reversi.turn == 1
     assert set(future_reversi.available_moves) == legal
     assert not future_reversi.done
     assert future_reversi.outcome == []
+
+def test_turn_skip_1():
+    """
+    Test simulating a move that skips Player 2's turn
+    """
+    reversi = Reversi(side=4, players=2, othello=False)
+    arr = np.ones((4, 4))
+    arr[2] = 2
+    arr[0][0] = 0
+    arr[0][1] = 2
+    arr[3,2] = 0
+    arr[3,3] = 0
+
+    reversi.load_game(1, arr)
+    reversi.apply_move((0, 0))
+    reversi.check_for_dead_moves()
+    assert reversi.turn == 1
+
+
+def test_winner_3():
+    """
+    Test simulating a move with Player 1 winning in 8x8 Othello
+    """
+    reversi = Reversi(side=8, players=2, othello=True)
+    arr = np.ones((8, 8))
+    arr[0,0] = 0
+    arr[0,1] = 2
+    reversi.load_game(1,arr)
+
+    reversi.apply_move((0,0))
+    expected = [
+    (0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),
+    (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),
+    (2,0),(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7),
+    (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),
+    (4,0),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),
+    (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6),(5,7),
+    (6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6),(6,7),
+    (7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7)
+]
+
+    for piece in expected:
+        assert reversi.piece_at(piece) == 1
+    assert reversi.done
+    assert reversi.outcome == [1]
+
+
+def test_winner_4():
+    """
+    Test simulating a move with a tie in 8x8 Othello
+    """
+    reversi = Reversi(side=8, players=2, othello=True)
+    arr = np.ones((8, 8))
+    arr[0,0] = 0
+    arr[0,1] = 2
+    arr[4:9] = 2
+    reversi.load_game(1,arr)
+
+    reversi.apply_move((0,0))
+    expected = [
+    [(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),
+     (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),
+     (2,0),(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7),
+    (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7)],
+    [(4,0),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),
+    (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6),(5,7),
+    (6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6),(6,7),
+    (7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7)]
+]
+
+    for player, piece_list in enumerate(expected):
+        for piece in piece_list:
+            assert reversi.piece_at(piece) == player + 1
+    assert reversi.done
+    assert reversi.outcome == [1,2]
+
+
+def test_winner_5():
+    """
+    Test simulating a move with Player 1 winning in 7x7 3 player Reversi
+    """
+    reversi = Reversi(side=7, players=3, othello=False)
+    arr = np.ones((7,7))
+    arr[0,0] = 0
+    arr[0,1] = 2
+    arr[5] = 2
+    arr[6] = 3
+    reversi.load_game(1,arr)
+
+    reversi.apply_move((0,0))
+
+    expected = [
+    [(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),
+     (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),
+     (2,0),(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),
+    (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),
+    (4,0),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6)],
+    [(5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6)],
+    [(6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6)]
+]
+
+    for player, piece_list in enumerate(expected):
+        for piece in piece_list:
+            assert reversi.piece_at(piece) == player + 1
+    assert reversi.done
+    assert reversi.outcome == [1]
+
+
+def test_winner_6():
+    """
+    Test simulating a move with Player 1 tying with 2 in 7x7 3 player Reversi
+    """
+    reversi = Reversi(side=7, players=3, othello=False)
+    arr = np.ones((7,7))
+    arr[0,0] = 0
+    arr[0,1] = 2
+    arr[3:6] = 2
+    arr[6] = 3
+    reversi.load_game(1,arr)
+
+    reversi.apply_move((0,0))
+
+    expected = [
+    [(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),
+     (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),
+     (2,0),(2,1),(2,2),(2,3),(2,4),(2,5),(2,6)],
+    [(3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),
+    (4,0),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6),
+    (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6)],
+    [(6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6),]
+]
+
+    for player, piece_list in enumerate(expected):
+        for piece in piece_list:
+            assert reversi.piece_at(piece) == player + 1
+    assert reversi.done
+    assert reversi.outcome == [1,2]
+
+
+def test_winner_7():
+    """
+    Test simulating a move with Player 1 in not full 8x8 Othello
+    """
+    reversi = Reversi(side=8, players=2, othello=True)
+    arr = np.ones((8,8))
+    arr[0,0] = 0
+    arr[0,1] = 2
+    arr[7,7] = 0
+    reversi.load_game(1,arr)
+
+    reversi.apply_move((0,0))
+    expected = [
+    [(7,7)],
+     [(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),
+     (1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),
+     (2,0),(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7),
+    (3,0),(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),
+    (4,0),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),
+    (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),(5,6),(5,7),
+    (6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6),(6,7),
+    (7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6)]
+]
+
+    for player, piece_list in enumerate(expected):
+        for piece in piece_list:
+            if player == 0:
+                assert reversi.piece_at(piece) is None
+            else:
+                assert reversi.piece_at(piece) == player
+    assert reversi.done
+    assert reversi.outcome == [1]
