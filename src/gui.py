@@ -101,15 +101,15 @@ class ReversiGUI:
                            center=(self.border + col * square + square / 2, self.border + row * square + square /2), radius=cells_side * 3,
                            width=10)
         
+        if self.reversi.done != True:
+            pygame.display.set_caption('Reversi')
+            font = pygame.font.Font('freesansbold.ttf', 20)
+            text = font.render(f"Player {self.reversi.turn}", True, white, blue)
+            textRect = text.get_rect()
+            textRect.center = (665, 80)
+            self.surface.blit(text, textRect)
 
-        pygame.display.set_caption('Reversi')
-        font = pygame.font.Font('freesansbold.ttf', 20)
-        text = font.render(f"Player {self.reversi.turn}", True, white, blue)
-        textRect = text.get_rect()
-        textRect.center = (665, 80)
-        self.surface.blit(text, textRect)
-
-        if self.reversi.done == True:
+        else:
             pygame.display.set_caption('Show Text')
             font = pygame.font.Font('freesansbold.ttf', 20)
             
