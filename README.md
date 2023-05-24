@@ -56,3 +56,22 @@ Improvements:
     
 - QA:
     This component received two S's in Milestone 2.
+
+- GUI:
+    [Code completeness] The GUI does not convey whose turn it is.:
+        Addressed by displaying turn of player, specifically in lines 104 - 110.
+
+    [Code completeness] The GUI does not highlight the player's possible moves.:
+        Addressed by displaying possible moves for current player using grey circles, 
+        specifically in lines 131 - 138 under the draw_window function.
+    
+    [Code completeness] Clicking a square where a move is possible does not make the move. and 
+    Clicking somewhere other than where a move is possible should have no effect.:
+        Addressed by editing the react_to function with an apply move call as well as an if statement to make sure that the click is in valid boundaries in lines 140 - 158. 
+
+    [Code completeness] Making a move in the upper-left corner does not end the game with the player winning the game. and
+    Making a move in the lower-right corner does not end the game in a tie.:
+        Addressed in lines 131 - 138 under the draw_window function
+
+    [Code completeness] The GUI does not convey who the winner of the game is.:
+       Addressed in lines 116 - 129 using the text render section. 
