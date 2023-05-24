@@ -94,7 +94,7 @@ class ReversiGUI:
                            width=10)
         
 
-        pygame.display.set_caption('Show Text')
+        pygame.display.set_caption('Reversi')
         font = pygame.font.Font('freesansbold.ttf', 20)
         text = font.render(f"Player {self.reversi.turn}", True, white, blue)
         textRect = text.get_rect()
