@@ -61,8 +61,7 @@ class ReversiGUI:
         try:
             pygame.mixer.init()
             pygame.mixer.music.load("06. Sacrificial Mission.mp3")
-            pygame.mixer.music.set_volume(0.5)
-            pygame.mixer.music.play
+            pygame.mixer.music.play()
         except pygame.error:
             print("No audio device found")
 
