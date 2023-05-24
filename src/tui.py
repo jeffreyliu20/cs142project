@@ -1,8 +1,12 @@
+"""
+One Note: I do not use the check_for_dead_moves method because I want to notify
+the player if their turn is skipped, which I can't do using that method
+"""
+
 
 import sys
 from typing import List, Optional, Tuple, Set, Callable
-from mocks import ReversiStub, ReversiMock
-from reversi import BoardGridType, Reversi
+from reversi import BoardGridType, Reversi, ListMovesType
 from bot import choose_random_move, choose_high_n_move, choose_high_m_move
 
 import click
@@ -44,7 +48,7 @@ CLOCK_CHARS = {
               type=click.Choice(['none', "random", "smart", "very-smart"]),
               help="What type of bot strategy you want to use")
 
-def play_game(num_players, board_size, othello, bot):
+def play_game(num_players: int, board_size: int, othello: bool, bot: str):
     
     if board_size < 3:
         print("Board size must be 3 or greater. Please try again.")
@@ -55,16 +59,16 @@ def play_game(num_players, board_size, othello, bot):
               "even. Please try again")
     else:
 
-        game = Reversi(board_size, num_players, othello)
+        game: Reversi = Reversi(board_size, num_players, othello)
 
-        bot_in_game = bot != "none"
+        bot_in_game: bool = bot != "none"
         
-        grid_size = 2 * board_size + 1
+        grid_size: int = 2 * board_size + 1
         
-        board = []
+        board: List[List[str]] = []
 
         for i in range(grid_size):
-            board_row = []
+            board_row: List[str] = []
             for j in range(grid_size):
                 board_row.append("")
             board.append(board_row)
@@ -119,13 +123,13 @@ def play_game(num_players, board_size, othello, bot):
             print()
             print(f"The bot will be Player {num_players}")
 
-        earlyEnd = False
-        players_skipped = 0
+        earlyEnd: bool = False
+        players_skipped: int = 0
 
         while not game.done and players_skipped < num_players:
 
-            moves = game.available_moves
-            turn = game._turn
+            moves: ListMovesType = game.available_moves
+            turn: int = game._turn
 
             if len(moves) == 0:
                 print()
@@ -206,7 +210,6 @@ def play_game(num_players, board_size, othello, bot):
                 board_str = "\n".join(board_row)
                 print(board_str)
 
-
         game.end_game()
         winners = game.outcome
         if len(winners) == 1:
@@ -216,4 +219,5 @@ def play_game(num_players, board_size, othello, bot):
             for person in winners:
                 print(f"Player {person}")
 
-play_game()
+if __name__ == "__main__":
+    play_game()
