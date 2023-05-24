@@ -9,6 +9,7 @@ import click
 
 pygame.init()
 
+
 white = (255, 255, 255)
 green = (0, 255, 0)
 blue = (0, 0, 128)
@@ -56,6 +57,16 @@ class ReversiGUI:
         self.surface = pygame.display.set_mode((window + 12 * border + cells_side,
                                                 window))
         self.clock = pygame.time.Clock()
+
+        try:
+            pygame.mixer.init()
+            pygame.mixer.music.load("06. Sacrificial Mission.mp3")
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play
+        except pygame.error:
+            print("No audio device found")
+
+
 
         self.event_loop()
 
