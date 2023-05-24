@@ -7,8 +7,9 @@ Team members:
 - Jeffrey Liu (jliu26) - worked on qa
 
 Enhancements:
-    -implemented the board as a numpy array
-    -added bot player support to the TUI
+    - implemented the board as a numpy array
+    - added bot player support to the TUI
+    - added music to the GUI
 
 Improvements:
 - Game Logic:
