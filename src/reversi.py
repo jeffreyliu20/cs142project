@@ -876,8 +876,9 @@ class Reversi(ReversiBase):
 
         for row in grid:
             for square in row:
-                if square > self.num_players or square < 0:
-                    raise ValueError("Grid contains invalid player")
+                if square is not None:
+                    if square > self.num_players or square < 0:
+                        raise ValueError("Grid contains invalid player")
                 
         self._board = new_board
         self._done = False
