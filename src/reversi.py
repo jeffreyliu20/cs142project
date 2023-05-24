@@ -780,11 +780,6 @@ class Reversi(ReversiBase):
             or len(self.pieces) == self.size ** 2):
             self.end_game()
         
-        while not self.available_moves:
-            self._turn += 1
-            if self._turn > self.num_players:
-                self._turn = 1
-        
     def check_for_dead_moves(self) -> None:
         """
         Skips at least one turn. If the player to which it skips doesn't have 
